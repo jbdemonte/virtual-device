@@ -1,8 +1,33 @@
 package linux
 
+import (
+	"syscall"
+	"unsafe"
+)
+
 // From https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h
 
+/*
+ * The event structure itself
+ */
+type InputEvent struct {
+	Time  syscall.Timeval
+	Type  uint16
+	Code  uint16
+	Value int32
+}
+
+const SizeofEvent = int(unsafe.Sizeof(InputEvent{}))
+
 type BusType uint16
+
+// input_id from https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h#L59
+type InputID struct {
+	BusType BusType
+	Vendor  uint16
+	Product uint16
+	Version uint16
+}
 
 const (
 	BUS_PCI       BusType = 0x01

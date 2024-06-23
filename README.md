@@ -1,5 +1,6 @@
+[WIP]
 
-Virtual Input
+Virtual Device
 
 This package provides pure go functions to create virtual devices on Linux using [uinput](https://kernel.org/doc/html/v4.12/input/uinput.html).
 

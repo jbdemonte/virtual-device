@@ -1,19 +1,14 @@
 package virtual_device
 
 import (
+	"context"
 	"os"
-	"virtual-input/linux"
+	"virtual_device/linux"
 )
 
-type ID struct {
-	busType linux.BusType
-	vendor  uint16
-	product uint16
-	version uint16
-}
-
 type Events struct {
-	keys []uint16
+	keys    []linux.Key
+	buttons []linux.Button
 }
 
 type virtualDevice struct {
@@ -21,6 +16,9 @@ type virtualDevice struct {
 	path   string
 	mode   os.FileMode
 	name   string
-	id     ID
+	id     linux.InputID
 	events Events
+
+	out    chan linux.InputEvent
+	cancel context.CancelFunc
 }

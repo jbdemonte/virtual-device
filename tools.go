@@ -5,12 +5,11 @@ import (
 	"os"
 	"strings"
 	"syscall"
-	"virtual-input/linux"
 )
 
 // original function taken from: https://github.com/tianon/debian-golang-pty/blob/master/ioctl.go
-func ioctl[A int | uint16 | linux.EventType](deviceFile *os.File, cmd uintptr, arg A) error {
-	_, _, errorCode := syscall.Syscall(syscall.SYS_IOCTL, deviceFile.Fd(), cmd, uintptr(arg))
+func ioctl(deviceFile *os.File, cmd, arg uintptr) error {
+	_, _, errorCode := syscall.Syscall(syscall.SYS_IOCTL, deviceFile.Fd(), cmd, arg)
 	if errorCode != 0 {
 		return errorCode
 	}
