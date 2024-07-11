@@ -2,8 +2,8 @@ package virtual_device
 
 import (
 	"context"
+	"github.com/jbdemonte/virtual-device/linux"
 	"os"
-	"virtual_device/linux"
 )
 
 type Events struct {

@@ -1,3 +1,3 @@
-module virtual_device
+module github.com/jbdemonte/virtual-device
 
-go 1.22
+go 1.21

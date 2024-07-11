@@ -2,9 +2,9 @@ package virtual_device
 
 import (
 	"fmt"
+	"github.com/jbdemonte/virtual-device/linux"
 	"testing"
 	"time"
-	"virtual_device/linux"
 )
 
 func TestVirtualKeyboard(t *testing.T) {

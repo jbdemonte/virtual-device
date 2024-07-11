@@ -6,12 +6,12 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/jbdemonte/virtual-device/linux"
 	"os"
 	"sync"
 	"syscall"
 	"time"
 	"unsafe"
-	"virtual_device/linux"
 )
 
 type VirtualDevice interface {
