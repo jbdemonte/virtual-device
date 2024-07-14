@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/jbdemonte/virtual-device/linux"
 	"os"
+	"sync"
 )
 
 type Events struct {
@@ -12,13 +13,15 @@ type Events struct {
 }
 
 type virtualDevice struct {
-	fd     *os.File
-	path   string
-	mode   os.FileMode
-	name   string
-	id     linux.InputID
-	events Events
+	fd       *os.File
+	path     string
+	mode     os.FileMode
+	queueLen int
+	name     string
+	id       linux.InputID
+	events   Events
 
-	out    chan linux.InputEvent
+	out    chan *linux.InputEvent
 	cancel context.CancelFunc
+	mu     sync.Mutex
 }

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/jbdemonte/virtual-device/linux"
 	"os"
-	"sync"
 	"syscall"
 	"time"
 	"unsafe"
@@ -17,6 +16,7 @@ import (
 type VirtualDevice interface {
 	SetPath(path string) VirtualDevice
 	SetMode(mode os.FileMode) VirtualDevice
+	SetQueueLength(queueLength int) VirtualDevice
 	SetBusType(busType linux.BusType) VirtualDevice
 	SetVendorID(vendorID uint16) VirtualDevice
 	SetProductID(productID uint16) VirtualDevice
@@ -35,8 +35,9 @@ type VirtualDevice interface {
 
 func NewVirtualDevice() VirtualDevice {
 	return &virtualDevice{
-		path: "/dev/uinput",
-		mode: 0660,
+		path:     "/dev/uinput",
+		mode:     0660,
+		queueLen: 1024,
 	}
 }
 
@@ -47,6 +48,11 @@ func (vd *virtualDevice) SetPath(path string) VirtualDevice {
 
 func (vd *virtualDevice) SetMode(mode os.FileMode) VirtualDevice {
 	vd.mode = mode
+	return vd
+}
+
+func (vd *virtualDevice) SetQueueLength(queueLen int) VirtualDevice {
+	vd.queueLen = queueLen
 	return vd
 }
 
@@ -190,25 +196,24 @@ func (vd *virtualDevice) Close() (err error) {
 	return nil
 }
 
-// Send sends an event to the device.
+// Send an event to the device.
 func (vd *virtualDevice) Send(evType, code uint16, value int32) error {
-	var once sync.Once
-	once.Do(func() {
+	vd.mu.Lock()
+	if vd.out == nil {
 		var ctxt context.Context
 		ctxt, vd.cancel = context.WithCancel(context.Background())
-		vd.out = make(chan linux.InputEvent, 1)
+		vd.out = make(chan *linux.InputEvent, vd.queueLen)
 		go func() {
 			defer close(vd.out)
-			var event linux.InputEvent
+			var event *linux.InputEvent
 			for {
 				select {
 				case event = <-vd.out:
-					//buf := (*(*[1<<27 - 1]byte)(unsafe.Pointer(&event)))[:linux.SizeofEvent]
+					if event == nil {
+						return
+					}
 
-					// chat GPT (todo a verifier)
-					// _, err := fd.Write((*[unsafe.Sizeof(event)]byte)(unsafe.Pointer(&event))[:])
-					buf := (*[unsafe.Sizeof(event)]byte)(unsafe.Pointer(&event))[:]
-
+					buf := (*[unsafe.Sizeof(*event)]byte)(unsafe.Pointer(event))[:]
 					n, err := vd.fd.Write(buf)
 					if err != nil {
 						return
@@ -222,8 +227,10 @@ func (vd *virtualDevice) Send(evType, code uint16, value int32) error {
 				}
 			}
 		}()
-	})
-	vd.out <- linux.InputEvent{
+	}
+	vd.mu.Unlock()
+
+	vd.out <- &linux.InputEvent{
 		Type:  evType,
 		Code:  code,
 		Value: value,
