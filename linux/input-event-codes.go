@@ -837,19 +837,19 @@ const (
  * Relative axes
  */
 
-type RelativeAxe uint16
+type RelativeAxis uint16
 
 const (
-	REL_X      RelativeAxe = 0x00
-	REL_Y      RelativeAxe = 0x01
-	REL_Z      RelativeAxe = 0x02
-	REL_RX     RelativeAxe = 0x03
-	REL_RY     RelativeAxe = 0x04
-	REL_RZ     RelativeAxe = 0x05
-	REL_HWHEEL RelativeAxe = 0x06
-	REL_DIAL   RelativeAxe = 0x07
-	REL_WHEEL  RelativeAxe = 0x08
-	REL_MISC   RelativeAxe = 0x09
+	REL_X      RelativeAxis = 0x00
+	REL_Y      RelativeAxis = 0x01
+	REL_Z      RelativeAxis = 0x02
+	REL_RX     RelativeAxis = 0x03
+	REL_RY     RelativeAxis = 0x04
+	REL_RZ     RelativeAxis = 0x05
+	REL_HWHEEL RelativeAxis = 0x06
+	REL_DIAL   RelativeAxis = 0x07
+	REL_WHEEL  RelativeAxis = 0x08
+	REL_MISC   RelativeAxis = 0x09
 	/*
 	 * 0x0a is reserved and should not be used in input drivers.
 	 * It was used by HID as REL_MISC+1 and userspace needs to detect if
@@ -857,49 +857,49 @@ const (
 	 * We define here REL_RESERVED so userspace can rely on it and detect
 	 * the situation described above.
 	 */
-	REL_RESERVED      RelativeAxe = 0x0a
-	REL_WHEEL_HI_RES  RelativeAxe = 0x0b
-	REL_HWHEEL_HI_RES RelativeAxe = 0x0c
-	REL_MAX           RelativeAxe = 0x0f
-	REL_CNT           RelativeAxe = (REL_MAX + 1)
+	REL_RESERVED      RelativeAxis = 0x0a
+	REL_WHEEL_HI_RES  RelativeAxis = 0x0b
+	REL_HWHEEL_HI_RES RelativeAxis = 0x0c
+	REL_MAX           RelativeAxis = 0x0f
+	REL_CNT           RelativeAxis = (REL_MAX + 1)
 )
 
 /*
  * Absolute axes
  */
 
-type AbsoluteAxe uint16
+type AbsoluteAxis uint16
 
 const (
-	ABS_X          AbsoluteAxe = 0x00
-	ABS_Y          AbsoluteAxe = 0x01
-	ABS_Z          AbsoluteAxe = 0x02
-	ABS_RX         AbsoluteAxe = 0x03
-	ABS_RY         AbsoluteAxe = 0x04
-	ABS_RZ         AbsoluteAxe = 0x05
-	ABS_THROTTLE   AbsoluteAxe = 0x06
-	ABS_RUDDER     AbsoluteAxe = 0x07
-	ABS_WHEEL      AbsoluteAxe = 0x08
-	ABS_GAS        AbsoluteAxe = 0x09
-	ABS_BRAKE      AbsoluteAxe = 0x0a
-	ABS_HAT0X      AbsoluteAxe = 0x10
-	ABS_HAT0Y      AbsoluteAxe = 0x11
-	ABS_HAT1X      AbsoluteAxe = 0x12
-	ABS_HAT1Y      AbsoluteAxe = 0x13
-	ABS_HAT2X      AbsoluteAxe = 0x14
-	ABS_HAT2Y      AbsoluteAxe = 0x15
-	ABS_HAT3X      AbsoluteAxe = 0x16
-	ABS_HAT3Y      AbsoluteAxe = 0x17
-	ABS_PRESSURE   AbsoluteAxe = 0x18
-	ABS_DISTANCE   AbsoluteAxe = 0x19
-	ABS_TILT_X     AbsoluteAxe = 0x1a
-	ABS_TILT_Y     AbsoluteAxe = 0x1b
-	ABS_TOOL_WIDTH AbsoluteAxe = 0x1c
+	ABS_X          AbsoluteAxis = 0x00
+	ABS_Y          AbsoluteAxis = 0x01
+	ABS_Z          AbsoluteAxis = 0x02
+	ABS_RX         AbsoluteAxis = 0x03
+	ABS_RY         AbsoluteAxis = 0x04
+	ABS_RZ         AbsoluteAxis = 0x05
+	ABS_THROTTLE   AbsoluteAxis = 0x06
+	ABS_RUDDER     AbsoluteAxis = 0x07
+	ABS_WHEEL      AbsoluteAxis = 0x08
+	ABS_GAS        AbsoluteAxis = 0x09
+	ABS_BRAKE      AbsoluteAxis = 0x0a
+	ABS_HAT0X      AbsoluteAxis = 0x10
+	ABS_HAT0Y      AbsoluteAxis = 0x11
+	ABS_HAT1X      AbsoluteAxis = 0x12
+	ABS_HAT1Y      AbsoluteAxis = 0x13
+	ABS_HAT2X      AbsoluteAxis = 0x14
+	ABS_HAT2Y      AbsoluteAxis = 0x15
+	ABS_HAT3X      AbsoluteAxis = 0x16
+	ABS_HAT3Y      AbsoluteAxis = 0x17
+	ABS_PRESSURE   AbsoluteAxis = 0x18
+	ABS_DISTANCE   AbsoluteAxis = 0x19
+	ABS_TILT_X     AbsoluteAxis = 0x1a
+	ABS_TILT_Y     AbsoluteAxis = 0x1b
+	ABS_TOOL_WIDTH AbsoluteAxis = 0x1c
 
-	ABS_VOLUME  AbsoluteAxe = 0x20
-	ABS_PROFILE AbsoluteAxe = 0x21
+	ABS_VOLUME  AbsoluteAxis = 0x20
+	ABS_PROFILE AbsoluteAxis = 0x21
 
-	ABS_MISC AbsoluteAxe = 0x28
+	ABS_MISC AbsoluteAxis = 0x28
 
 	/*
 	 * 0x2e is reserved and should not be used in input drivers.
@@ -908,26 +908,26 @@ const (
 	 * We define here ABS_RESERVED so userspace can rely on it and detect
 	 * the situation described above.
 	 */
-	ABS_RESERVED AbsoluteAxe = 0x2e
+	ABS_RESERVED AbsoluteAxis = 0x2e
 
-	ABS_MT_SLOT        AbsoluteAxe = 0x2f /* MT slot being modified */
-	ABS_MT_TOUCH_MAJOR AbsoluteAxe = 0x30 /* Major axis of touching ellipse */
-	ABS_MT_TOUCH_MINOR AbsoluteAxe = 0x31 /* Minor axis (omit if circular) */
-	ABS_MT_WIDTH_MAJOR AbsoluteAxe = 0x32 /* Major axis of approaching ellipse */
-	ABS_MT_WIDTH_MINOR AbsoluteAxe = 0x33 /* Minor axis (omit if circular) */
-	ABS_MT_ORIENTATION AbsoluteAxe = 0x34 /* Ellipse orientation */
-	ABS_MT_POSITION_X  AbsoluteAxe = 0x35 /* Center X touch position */
-	ABS_MT_POSITION_Y  AbsoluteAxe = 0x36 /* Center Y touch position */
-	ABS_MT_TOOL_TYPE   AbsoluteAxe = 0x37 /* Type of touching device */
-	ABS_MT_BLOB_ID     AbsoluteAxe = 0x38 /* Group a set of packets as a blob */
-	ABS_MT_TRACKING_ID AbsoluteAxe = 0x39 /* Unique ID of initiated contact */
-	ABS_MT_PRESSURE    AbsoluteAxe = 0x3a /* Pressure on contact area */
-	ABS_MT_DISTANCE    AbsoluteAxe = 0x3b /* Contact hover distance */
-	ABS_MT_TOOL_X      AbsoluteAxe = 0x3c /* Center X tool position */
-	ABS_MT_TOOL_Y      AbsoluteAxe = 0x3d /* Center Y tool position */
+	ABS_MT_SLOT        AbsoluteAxis = 0x2f /* MT slot being modified */
+	ABS_MT_TOUCH_MAJOR AbsoluteAxis = 0x30 /* Major axis of touching ellipse */
+	ABS_MT_TOUCH_MINOR AbsoluteAxis = 0x31 /* Minor axis (omit if circular) */
+	ABS_MT_WIDTH_MAJOR AbsoluteAxis = 0x32 /* Major axis of approaching ellipse */
+	ABS_MT_WIDTH_MINOR AbsoluteAxis = 0x33 /* Minor axis (omit if circular) */
+	ABS_MT_ORIENTATION AbsoluteAxis = 0x34 /* Ellipse orientation */
+	ABS_MT_POSITION_X  AbsoluteAxis = 0x35 /* Center X touch position */
+	ABS_MT_POSITION_Y  AbsoluteAxis = 0x36 /* Center Y touch position */
+	ABS_MT_TOOL_TYPE   AbsoluteAxis = 0x37 /* Type of touching device */
+	ABS_MT_BLOB_ID     AbsoluteAxis = 0x38 /* Group a set of packets as a blob */
+	ABS_MT_TRACKING_ID AbsoluteAxis = 0x39 /* Unique ID of initiated contact */
+	ABS_MT_PRESSURE    AbsoluteAxis = 0x3a /* Pressure on contact area */
+	ABS_MT_DISTANCE    AbsoluteAxis = 0x3b /* Contact hover distance */
+	ABS_MT_TOOL_X      AbsoluteAxis = 0x3c /* Center X tool position */
+	ABS_MT_TOOL_Y      AbsoluteAxis = 0x3d /* Center Y tool position */
 
-	ABS_MAX AbsoluteAxe = 0x3f
-	ABS_CNT AbsoluteAxe = (ABS_MAX + 1)
+	ABS_MAX AbsoluteAxis = 0x3f
+	ABS_CNT AbsoluteAxis = (ABS_MAX + 1)
 )
 
 /*

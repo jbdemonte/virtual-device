@@ -1,27 +1,25 @@
 package virtual_device
 
 import (
-	"context"
 	"github.com/jbdemonte/virtual-device/linux"
+	"github.com/jbdemonte/virtual-device/utils"
 	"os"
-	"sync"
 )
 
 type Events struct {
-	keys    []linux.Key
-	buttons []linux.Button
+	keys         []linux.Key
+	buttons      []linux.Button
+	absoluteAxes []linux.AbsoluteAxis
 }
 
 type virtualDevice struct {
-	fd       *os.File
-	path     string
-	mode     os.FileMode
-	queueLen int
-	name     string
-	id       linux.InputID
-	events   Events
-
-	out    chan *linux.InputEvent
-	cancel context.CancelFunc
-	mu     sync.Mutex
+	fd           *os.File
+	path         string
+	mode         os.FileMode
+	queueLen     int
+	name         string
+	id           linux.InputID
+	events       Events
+	isRegistered *utils.AtomicBool
+	queue        chan *linux.InputEvent
 }
