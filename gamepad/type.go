@@ -8,11 +8,7 @@ type MappingAxes map[Button]linux.AbsoluteAxis
 
 type MappingHat map[Button]HatDirection
 
-type MappingDigital struct {
-	Buttons MappingButtons
-	Hat     MappingHat
-	Axes    MappingAxes
-}
+type MappingDigital map[Button][]InputEvent
 
 type MappingStick struct {
 	X linux.AbsoluteAxis
@@ -36,4 +32,13 @@ type AxisConfig struct {
 
 type Config struct {
 	Axes map[linux.AbsoluteAxis]AxisConfig
+}
+
+type InputEvent interface{}
+
+type MSCScanCode uint32
+
+type HatEvent struct {
+	axe   linux.AbsoluteAxis
+	value int
 }

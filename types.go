@@ -9,6 +9,7 @@ import (
 type Events struct {
 	keys         []linux.Key
 	buttons      []linux.Button
+	scanCodes    []uint32
 	absoluteAxes []linux.AbsoluteAxis
 }
 

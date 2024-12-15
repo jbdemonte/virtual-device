@@ -12,9 +12,7 @@ func createVirtualGamepad(device virtual_device.VirtualDevice, mapping Mapping) 
 		mapping: mapping,
 	}
 
-	vg.setEventButtons()
-	vg.setEventAbsoluteAxes()
-
+	vg.setEvents()
 	return vg
 }
 
@@ -40,36 +38,29 @@ func (v *virtualGamepad) Unregister() error {
 	return v.device.Unregister()
 }
 
-func (v *virtualGamepad) setEventButtons() {
+func (v *virtualGamepad) setEvents() {
 	buttons := make([]linux.Button, 0)
-
-	if v.mapping.Digital.Buttons != nil {
-		for _, button := range v.mapping.Digital.Buttons {
-			buttons = append(buttons, button)
-		}
-	}
-	if len(buttons) > 0 {
-		v.device.SetEventButtons(buttons)
-	}
-}
-
-func (v *virtualGamepad) setEventAbsoluteAxes() {
+	keys := make([]linux.Key, 0)
 	absoluteAxes := make([]linux.AbsoluteAxis, 0)
+	scanCodes := make([]uint32, 0)
 
-	if v.mapping.Digital.Hat != nil {
-		for _, hat := range v.mapping.Digital.Hat {
-			if hat == HatUp || hat == HatDown {
-				absoluteAxes = append(absoluteAxes, linux.ABS_HAT0Y)
+	for _, events := range v.mapping.Digital {
+		for _, event := range events {
+			switch e := event.(type) {
+			case linux.Button:
+				buttons = append(buttons, e)
+			case linux.Key:
+				keys = append(keys, e)
+			case MSCScanCode:
+				fmt.Printf("scanCodes %d\n", e)
+				scanCodes = append(scanCodes, uint32(e))
+			case HatEvent:
+				absoluteAxes = append(absoluteAxes, e.axe)
+			case linux.AbsoluteAxis:
+				absoluteAxes = append(absoluteAxes, e)
+			default:
+				fmt.Println("Unknown event type")
 			}
-			if hat == HatLeft || hat == HatRight {
-				absoluteAxes = append(absoluteAxes, linux.ABS_HAT0X)
-			}
-		}
-	}
-
-	if v.mapping.Digital.Axes != nil {
-		for _, axis := range v.mapping.Digital.Axes {
-			absoluteAxes = append(absoluteAxes, axis)
 		}
 	}
 
@@ -83,36 +74,65 @@ func (v *virtualGamepad) setEventAbsoluteAxes() {
 		)
 	}
 
-	if len(absoluteAxes) > 0 {
-		// todo absoluteAxes may contains duplicate due to Hat, need to check if it's a problem
-		v.device.SetEventAbsoluteAxes(absoluteAxes)
-	}
+	v.device.SetEventButtons(buttons)
+	v.device.SetEventKeys(keys)
+	v.device.SetEventScanCode(scanCodes)
+
+	// todo absoluteAxes may contains duplicate due to Hat, need to check if it's a problem
+	v.device.SetEventAbsoluteAxes(absoluteAxes)
 }
 
-// todo - handle Axes / Hat when used as a button
-
 func (v *virtualGamepad) Press(button Button) {
-	b, exist := v.mapping.Digital.Buttons[button]
+	events, exist := v.mapping.Digital[button]
 	if !exist {
 		fmt.Printf("button not assigned (0x%x)\n", button)
 	}
-	v.device.KeyDown(uint16(b))
+	for _, event := range events {
+		switch e := event.(type) {
+		case linux.Button:
+			v.device.KeyDown(uint16(e))
+		case linux.Key:
+			v.device.KeyDown(uint16(e))
+		case MSCScanCode:
+			v.device.SendScanCode(int32(e))
+		case HatEvent:
+			v.device.SendAbsoluteEvent(uint16(e.axe), int32(e.value))
+		default:
+			fmt.Println("Unknown event type")
+		}
+	}
+	v.device.SendSync()
 }
 
 func (v *virtualGamepad) Release(button Button) {
-	b, exist := v.mapping.Digital.Buttons[button]
+	events, exist := v.mapping.Digital[button]
 	if !exist {
 		fmt.Printf("button not assigned (0x%x)\n", button)
 	}
-	v.device.KeyUp(uint16(b))
+	for _, event := range events {
+		switch e := event.(type) {
+		case linux.Button:
+			v.device.KeyUp(uint16(e))
+		case linux.Key:
+			v.device.KeyUp(uint16(e))
+		case MSCScanCode:
+			v.device.SendScanCode(int32(e))
+		case HatEvent:
+			v.device.SendAbsoluteEvent(uint16(e.axe), 0)
+		default:
+			fmt.Println("Unknown event type")
+		}
+	}
+	v.device.SendSync()
 }
 
-// x & y are normalized values
+// MoveLeftStick x & y are normalized values
 func (v *virtualGamepad) MoveLeftStick(x, y float32) {
 	if v.mapping.Analog == nil {
 		return
 	}
 	// todo - replace 32767 by the config one if defined
-	v.device.SendStickAxisEvent(uint16(v.mapping.Analog.Left.X), int32(x*32767))
-	v.device.SendStickAxisEvent(uint16(v.mapping.Analog.Left.Y), int32(y*32767))
+	v.device.SendAbsoluteEvent(uint16(v.mapping.Analog.Left.X), int32(x*32767))
+	v.device.SendAbsoluteEvent(uint16(v.mapping.Analog.Left.Y), int32(y*32767))
+	v.device.SendSync()
 }

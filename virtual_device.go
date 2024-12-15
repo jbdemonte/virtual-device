@@ -25,14 +25,17 @@ type VirtualDevice interface {
 	SetName(name string) VirtualDevice
 	SetEventKeys(keys []linux.Key) VirtualDevice
 	SetEventButtons(buttons []linux.Button) VirtualDevice
+	SetEventScanCode(scanCodes []uint32) VirtualDevice
 	SetEventAbsoluteAxes(absoluteAxes []linux.AbsoluteAxis) VirtualDevice
 	Register() error
 	Unregister() error
 	Send(evType, code uint16, value int32)
+	SendSync()
 	KeyPress(key uint16)
 	KeyDown(key uint16)
 	KeyUp(key uint16)
-	SendStickAxisEvent(absCode uint16, value int32)
+	SendAbsoluteEvent(absCode uint16, value int32)
+	SendScanCode(value int32)
 }
 
 func NewVirtualDevice() VirtualDevice {
@@ -91,6 +94,11 @@ func (vd *virtualDevice) SetEventKeys(keys []linux.Key) VirtualDevice {
 
 func (vd *virtualDevice) SetEventButtons(buttons []linux.Button) VirtualDevice {
 	vd.events.buttons = buttons
+	return vd
+}
+
+func (vd *virtualDevice) SetEventScanCode(scanCodes []uint32) VirtualDevice {
+	vd.events.scanCodes = scanCodes
 	return vd
 }
 
@@ -184,6 +192,18 @@ func (vd *virtualDevice) registerEvents() error {
 		}
 	}
 
+	if vd.events.scanCodes != nil && len(vd.events.scanCodes) > 0 {
+		err = ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_MSC))
+		if err != nil {
+			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_MSC: %v", err)
+		}
+
+		err = ioctl(vd.fd, linux.UI_SET_MSCBIT, uintptr(linux.MSC_SCAN))
+		if err != nil {
+			return fmt.Errorf("failed to register MSC_SCAN: %v", err)
+		}
+	}
+
 	if vd.events.absoluteAxes != nil {
 		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_ABS))
 		if err != nil {
@@ -205,24 +225,12 @@ func (vd *virtualDevice) pull() {
 
 	go func() {
 		for event := range vd.queue {
-			err := vd.writeEventAndSync(event)
+			err := vd.writeEvent(event)
 			if err != nil {
 				fmt.Printf("failed to write event: %v", err)
 			}
 		}
 	}()
-}
-
-func (vd *virtualDevice) writeEventAndSync(event *linux.InputEvent) error {
-	err := vd.writeEvent(event)
-	if err != nil {
-		return err
-	}
-	err = vd.writeSyncEvents()
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (vd *virtualDevice) writeEvent(event *linux.InputEvent) error {
@@ -235,14 +243,6 @@ func (vd *virtualDevice) writeEvent(event *linux.InputEvent) error {
 		fmt.Fprintf(os.Stderr, "poll outbox: short write\n")
 	}
 	return nil
-}
-
-func (vd *virtualDevice) writeSyncEvents() error {
-	return vd.writeEvent(&linux.InputEvent{
-		Type:  uint16(linux.EV_SYN),
-		Code:  uint16(linux.SYN_REPORT),
-		Value: 0,
-	})
 }
 
 func (vd *virtualDevice) unregisterOnError(err error) error {
@@ -323,6 +323,10 @@ func (vd *virtualDevice) KeyUp(key uint16) {
 	vd.Send(uint16(linux.EV_KEY), key, 0)
 }
 
-func (vg virtualDevice) SendStickAxisEvent(absCode uint16, value int32) {
-	vg.Send(uint16(linux.EV_ABS), absCode, value)
+func (vd *virtualDevice) SendAbsoluteEvent(absCode uint16, value int32) {
+	vd.Send(uint16(linux.EV_ABS), absCode, value)
+}
+
+func (vd *virtualDevice) SendScanCode(value int32) {
+	vd.Send(uint16(linux.EV_MSC), uint16(linux.MSC_SCAN), value)
 }

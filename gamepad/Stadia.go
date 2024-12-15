@@ -9,43 +9,30 @@ import (
 func NewStadia() VirtualGamepad {
 	mapping := Mapping{
 		Digital: MappingDigital{
-			Buttons: MappingButtons{
-				ButtonSouth: linux.BTN_SOUTH,
-				ButtonEast:  linux.BTN_EAST,
-				ButtonNorth: linux.BTN_WEST,
-				ButtonWest:  linux.BTN_NORTH,
+			ButtonSouth: []InputEvent{linux.BTN_SOUTH},
+			ButtonEast:  []InputEvent{linux.BTN_EAST},
+			ButtonNorth: []InputEvent{MSCScanCode(90005), linux.BTN_WEST},
+			ButtonWest:  []InputEvent{linux.BTN_NORTH},
 
-				ButtonL1: linux.BTN_TL,
-				ButtonR1: linux.BTN_TR,
+			ButtonL1: []InputEvent{linux.BTN_TL},
+			ButtonR1: []InputEvent{linux.BTN_TR},
 
-				ButtonL2: linux.BTN_TRIGGER_HAPPY4,
-				ButtonR2: linux.BTN_TRIGGER_HAPPY3,
+			ButtonSelect: []InputEvent{linux.BTN_SELECT},
+			ButtonStart:  []InputEvent{linux.BTN_START},
+			ButtonMode:   []InputEvent{linux.BTN_MODE}, // button stadia
 
-				ButtonSelect: linux.BTN_SELECT,
-				ButtonStart:  linux.BTN_START,
-				ButtonMode:   linux.BTN_MODE, // button stadia
+			ButtonFiller1: []InputEvent{linux.BTN_TRIGGER_HAPPY1}, // Assistant
+			ButtonFiller2: []InputEvent{linux.BTN_TRIGGER_HAPPY2}, // Capture
 
-				ButtonFiller1: linux.BTN_TRIGGER_HAPPY1, // Assistant
-				ButtonFiller2: linux.BTN_TRIGGER_HAPPY2, // Capture
+			ButtonL3: []InputEvent{linux.BTN_THUMBL},
+			ButtonR3: []InputEvent{linux.BTN_THUMBR},
 
-				ButtonL3: linux.BTN_THUMBL,
-				ButtonR3: linux.BTN_THUMBR,
-
-				ButtonUp:    linux.BTN_DPAD_UP,
-				ButtonDown:  linux.BTN_DPAD_DOWN,
-				ButtonLeft:  linux.BTN_DPAD_LEFT,
-				ButtonRight: linux.BTN_DPAD_RIGHT,
-			},
-			Axes: MappingAxes{
-				ButtonL2: linux.ABS_BRAKE,
-				ButtonR2: linux.ABS_GAS,
-			},
-			Hat: MappingHat{
-				ButtonUp:    HatUp,
-				ButtonDown:  HatDown,
-				ButtonLeft:  HatLeft,
-				ButtonRight: HatRight,
-			},
+			ButtonUp:    []InputEvent{linux.BTN_DPAD_UP, HatEvent{axe: linux.ABS_HAT0Y, value: -1}},
+			ButtonDown:  []InputEvent{linux.BTN_DPAD_DOWN, HatEvent{axe: linux.ABS_HAT0Y, value: 1}},
+			ButtonLeft:  []InputEvent{linux.BTN_DPAD_LEFT, HatEvent{axe: linux.ABS_HAT0X, value: -1}},
+			ButtonRight: []InputEvent{linux.BTN_DPAD_RIGHT, HatEvent{axe: linux.ABS_HAT0X, value: 1}},
+			ButtonL2:    []InputEvent{linux.BTN_TRIGGER_HAPPY4, linux.ABS_BRAKE},
+			ButtonR2:    []InputEvent{linux.BTN_TRIGGER_HAPPY3, linux.ABS_GAS},
 		},
 		Analog: &MappingAnalog{
 			Left: MappingStick{
