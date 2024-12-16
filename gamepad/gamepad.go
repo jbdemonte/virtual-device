@@ -22,6 +22,11 @@ type VirtualGamepad interface {
 	Press(button Button)
 	Release(button Button)
 	MoveLeftStick(x, y float32)
+	MoveLeftStickX(x float32)
+	MoveLeftStickY(y float32)
+	MoveRightStick(x, y float32)
+	MoveRightStickX(x float32)
+	MoveRightStickY(y float32)
 }
 
 type virtualGamepad struct {
@@ -41,7 +46,8 @@ func (v *virtualGamepad) Unregister() error {
 func (v *virtualGamepad) setEvents() {
 	buttons := make([]linux.Button, 0)
 	keys := make([]linux.Key, 0)
-	absoluteAxes := make([]linux.AbsoluteAxis, 0)
+	absoluteAxes := make([]virtual_device.AbsAxis, 0)
+	hatEvents := make([]HatEvent, 0)
 	scanCodes := make([]uint32, 0)
 
 	for _, events := range v.mapping.Digital {
@@ -55,8 +61,8 @@ func (v *virtualGamepad) setEvents() {
 				fmt.Printf("scanCodes %d\n", e)
 				scanCodes = append(scanCodes, uint32(e))
 			case HatEvent:
-				absoluteAxes = append(absoluteAxes, e.axe)
-			case linux.AbsoluteAxis:
+				hatEvents = append(hatEvents, e)
+			case virtual_device.AbsAxis:
 				absoluteAxes = append(absoluteAxes, e)
 			default:
 				fmt.Println("Unknown event type")
@@ -74,11 +80,14 @@ func (v *virtualGamepad) setEvents() {
 		)
 	}
 
+	if len(hatEvents) > 0 {
+		absoluteAxes = append(absoluteAxes, convertHatToAbsAxis(hatEvents)...)
+	}
+
 	v.device.SetEventButtons(buttons)
 	v.device.SetEventKeys(keys)
 	v.device.SetEventScanCode(scanCodes)
 
-	// todo absoluteAxes may contains duplicate due to Hat, need to check if it's a problem
 	v.device.SetEventAbsoluteAxes(absoluteAxes)
 }
 
@@ -96,7 +105,9 @@ func (v *virtualGamepad) Press(button Button) {
 		case MSCScanCode:
 			v.device.SendScanCode(int32(e))
 		case HatEvent:
-			v.device.SendAbsoluteEvent(uint16(e.axe), int32(e.value))
+			v.device.SendAbsoluteEvent(uint16(e.Axis), e.Value)
+		case virtual_device.AbsAxis:
+			v.device.SendAbsoluteEvent(uint16(e.Axis), e.Max)
 		default:
 			fmt.Println("Unknown event type")
 		}
@@ -118,7 +129,9 @@ func (v *virtualGamepad) Release(button Button) {
 		case MSCScanCode:
 			v.device.SendScanCode(int32(e))
 		case HatEvent:
-			v.device.SendAbsoluteEvent(uint16(e.axe), 0)
+			v.device.SendAbsoluteEvent(uint16(e.Axis), 0)
+		case virtual_device.AbsAxis:
+			v.device.SendAbsoluteEvent(uint16(e.Axis), e.Min)
 		default:
 			fmt.Println("Unknown event type")
 		}
@@ -126,13 +139,50 @@ func (v *virtualGamepad) Release(button Button) {
 	v.device.SendSync()
 }
 
-// MoveLeftStick x & y are normalized values
-func (v *virtualGamepad) MoveLeftStick(x, y float32) {
-	if v.mapping.Analog == nil {
-		return
-	}
-	// todo - replace 32767 by the config one if defined
-	v.device.SendAbsoluteEvent(uint16(v.mapping.Analog.Left.X), int32(x*32767))
-	v.device.SendAbsoluteEvent(uint16(v.mapping.Analog.Left.Y), int32(y*32767))
+func (v *virtualGamepad) moveStick(stick *MappingStick, x, y float32) {
+	v.device.SendAbsoluteEvent(uint16(stick.X.Axis), stick.X.Denormalize(x))
+	v.device.SendAbsoluteEvent(uint16(stick.Y.Axis), stick.Y.Denormalize(y))
 	v.device.SendSync()
+
+}
+
+func (v *virtualGamepad) moveAxis(absAxis *virtual_device.AbsAxis, p float32) {
+	v.device.SendAbsoluteEvent(uint16(absAxis.Axis), absAxis.Denormalize(p))
+	v.device.SendSync()
+}
+
+func (v *virtualGamepad) MoveLeftStick(x, y float32) {
+	if v.mapping.Analog != nil {
+		v.moveStick(&v.mapping.Analog.Left, x, y)
+	}
+}
+
+func (v *virtualGamepad) MoveLeftStickX(x float32) {
+	if v.mapping.Analog != nil {
+		v.moveAxis(&v.mapping.Analog.Left.X, x)
+	}
+}
+
+func (v *virtualGamepad) MoveLeftStickY(y float32) {
+	if v.mapping.Analog != nil {
+		v.moveAxis(&v.mapping.Analog.Left.Y, y)
+	}
+}
+
+func (v *virtualGamepad) MoveRightStick(x, y float32) {
+	if v.mapping.Analog != nil {
+		v.moveStick(&v.mapping.Analog.Right, x, y)
+	}
+}
+
+func (v *virtualGamepad) MoveRightStickX(x float32) {
+	if v.mapping.Analog != nil {
+		v.moveAxis(&v.mapping.Analog.Right.X, x)
+	}
+}
+
+func (v *virtualGamepad) MoveRightStickY(y float32) {
+	if v.mapping.Analog != nil {
+		v.moveAxis(&v.mapping.Analog.Right.Y, y)
+	}
 }

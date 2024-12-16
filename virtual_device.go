@@ -1,8 +1,6 @@
 package virtual_device
 
 import (
-	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"github.com/jbdemonte/virtual-device/linux"
@@ -26,7 +24,7 @@ type VirtualDevice interface {
 	SetEventKeys(keys []linux.Key) VirtualDevice
 	SetEventButtons(buttons []linux.Button) VirtualDevice
 	SetEventScanCode(scanCodes []uint32) VirtualDevice
-	SetEventAbsoluteAxes(absoluteAxes []linux.AbsoluteAxis) VirtualDevice
+	SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice
 	Register() error
 	Unregister() error
 	Send(evType, code uint16, value int32)
@@ -102,7 +100,7 @@ func (vd *virtualDevice) SetEventScanCode(scanCodes []uint32) VirtualDevice {
 	return vd
 }
 
-func (vd *virtualDevice) SetEventAbsoluteAxes(absoluteAxes []linux.AbsoluteAxis) VirtualDevice {
+func (vd *virtualDevice) SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice {
 	vd.events.absoluteAxes = absoluteAxes
 	return vd
 }
@@ -137,19 +135,22 @@ func (vd *virtualDevice) Register() error {
 func (vd *virtualDevice) createDevice() (err error) {
 	var fixedSizeName [linux.UINPUT_MAX_NAME_SIZE]byte
 	copy(fixedSizeName[:], vd.name)
-
-	fmt.Println("Creating virtual device")
-
-	buf := new(bytes.Buffer)
-	err = binary.Write(buf, binary.LittleEndian, linux.UInputUserDev{
-		Name: fixedSizeName,
-		ID:   vd.id,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to write user device buffer: %v", err)
+	if len(vd.name) < len(fixedSizeName) {
+		fixedSizeName[len(vd.name)] = 0
 	}
 
-	_, err = vd.fd.Write(buf.Bytes())
+	var uinputDev linux.UInputUserDev
+	copy(uinputDev.Name[:], fixedSizeName[:])
+	uinputDev.ID = vd.id
+
+	for _, event := range vd.events.absoluteAxes {
+		uinputDev.AbsMin[event.Axis] = event.Min
+		uinputDev.AbsMax[event.Axis] = event.Max
+		uinputDev.AbsFlat[event.Axis] = event.Flat
+		uinputDev.AbsFuzz[event.Axis] = event.Fuzz
+	}
+
+	_, err = vd.fd.Write((*[unsafe.Sizeof(uinputDev)]byte)(unsafe.Pointer(&uinputDev))[:])
 	if err != nil {
 		return fmt.Errorf("failed to write uidev struct to device file: %v", err)
 	}
@@ -209,10 +210,10 @@ func (vd *virtualDevice) registerEvents() error {
 		if err != nil {
 			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_ABS: %v", err)
 		}
-		for _, axe := range vd.events.absoluteAxes {
-			err = ioctl(vd.fd, linux.UI_SET_ABSBIT, uintptr(axe))
+		for _, event := range vd.events.absoluteAxes {
+			err = ioctl(vd.fd, linux.UI_SET_ABSBIT, uintptr(event.Axis))
 			if err != nil {
-				return fmt.Errorf("failed to register axe 0x%x: %v", axe, err)
+				return fmt.Errorf("failed to register axe 0x%x: %v", event.Axis, err)
 			}
 		}
 	}

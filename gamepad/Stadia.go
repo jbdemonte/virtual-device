@@ -9,39 +9,40 @@ import (
 func NewStadia() VirtualGamepad {
 	mapping := Mapping{
 		Digital: MappingDigital{
-			ButtonSouth: []InputEvent{linux.BTN_SOUTH},
-			ButtonEast:  []InputEvent{linux.BTN_EAST},
+			ButtonSouth: []InputEvent{MSCScanCode(90001), linux.BTN_SOUTH},
+			ButtonEast:  []InputEvent{MSCScanCode(90002), linux.BTN_EAST},
 			ButtonNorth: []InputEvent{MSCScanCode(90005), linux.BTN_WEST},
-			ButtonWest:  []InputEvent{linux.BTN_NORTH},
+			ButtonWest:  []InputEvent{MSCScanCode(90004), linux.BTN_NORTH},
 
-			ButtonL1: []InputEvent{linux.BTN_TL},
-			ButtonR1: []InputEvent{linux.BTN_TR},
+			ButtonSelect: []InputEvent{MSCScanCode(0x9000b), linux.BTN_SELECT}, // button Option
+			ButtonStart:  []InputEvent{MSCScanCode(0x9000c), linux.BTN_START},  // button Menu
+			ButtonMode:   []InputEvent{MSCScanCode(0x9000d), linux.BTN_MODE},   // button Stadia
 
-			ButtonSelect: []InputEvent{linux.BTN_SELECT},
-			ButtonStart:  []InputEvent{linux.BTN_START},
-			ButtonMode:   []InputEvent{linux.BTN_MODE}, // button stadia
+			ButtonFiller1: []InputEvent{MSCScanCode(90011), linux.BTN_TRIGGER_HAPPY1}, // Button Google Assistant
+			ButtonFiller2: []InputEvent{MSCScanCode(90012), linux.BTN_TRIGGER_HAPPY2}, // Button Capture
 
-			ButtonFiller1: []InputEvent{linux.BTN_TRIGGER_HAPPY1}, // Assistant
-			ButtonFiller2: []InputEvent{linux.BTN_TRIGGER_HAPPY2}, // Capture
+			ButtonUp:    []InputEvent{HatEvent{Axis: linux.ABS_HAT0Y, Value: -1}},
+			ButtonDown:  []InputEvent{HatEvent{Axis: linux.ABS_HAT0Y, Value: 1}},
+			ButtonLeft:  []InputEvent{HatEvent{Axis: linux.ABS_HAT0X, Value: -1}},
+			ButtonRight: []InputEvent{HatEvent{Axis: linux.ABS_HAT0X, Value: 1}},
 
-			ButtonL3: []InputEvent{linux.BTN_THUMBL},
-			ButtonR3: []InputEvent{linux.BTN_THUMBR},
+			ButtonL1: []InputEvent{MSCScanCode(90007), linux.BTN_TL},
+			ButtonR1: []InputEvent{MSCScanCode(90008), linux.BTN_TR},
 
-			ButtonUp:    []InputEvent{linux.BTN_DPAD_UP, HatEvent{axe: linux.ABS_HAT0Y, value: -1}},
-			ButtonDown:  []InputEvent{linux.BTN_DPAD_DOWN, HatEvent{axe: linux.ABS_HAT0Y, value: 1}},
-			ButtonLeft:  []InputEvent{linux.BTN_DPAD_LEFT, HatEvent{axe: linux.ABS_HAT0X, value: -1}},
-			ButtonRight: []InputEvent{linux.BTN_DPAD_RIGHT, HatEvent{axe: linux.ABS_HAT0X, value: 1}},
-			ButtonL2:    []InputEvent{linux.BTN_TRIGGER_HAPPY4, linux.ABS_BRAKE},
-			ButtonR2:    []InputEvent{linux.BTN_TRIGGER_HAPPY3, linux.ABS_GAS},
+			ButtonL2: []InputEvent{MSCScanCode(90014), linux.BTN_TRIGGER_HAPPY4, virtual_device.AbsAxis{Axis: linux.ABS_BRAKE, Min: 0, Value: 0, Max: 255, Flat: 15}},
+			ButtonR2: []InputEvent{MSCScanCode(90013), linux.BTN_TRIGGER_HAPPY3, virtual_device.AbsAxis{Axis: linux.ABS_GAS, Min: 0, Value: 0, Max: 255, Flat: 15}},
+
+			ButtonL3: []InputEvent{MSCScanCode(0x9000e), linux.BTN_THUMBL},
+			ButtonR3: []InputEvent{MSCScanCode(0x9000f), linux.BTN_THUMBR},
 		},
 		Analog: &MappingAnalog{
 			Left: MappingStick{
-				X: linux.ABS_X,
-				Y: linux.ABS_Y,
+				X: virtual_device.AbsAxis{Axis: linux.ABS_X, Min: 1, Value: 128, Max: 255, Flat: 15},
+				Y: virtual_device.AbsAxis{Axis: linux.ABS_Y, Min: 1, Value: 128, Max: 255, Flat: 15},
 			},
 			Right: MappingStick{
-				X: linux.ABS_Z,
-				Y: linux.ABS_RZ,
+				X: virtual_device.AbsAxis{Axis: linux.ABS_Z, Min: 1, Value: 128, Max: 255, Flat: 15},
+				Y: virtual_device.AbsAxis{Axis: linux.ABS_RZ, Min: 1, Value: 128, Max: 255, Flat: 15},
 			},
 		},
 	}

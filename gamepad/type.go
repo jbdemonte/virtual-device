@@ -1,6 +1,9 @@
 package gamepad
 
-import "github.com/jbdemonte/virtual-device/linux"
+import (
+	virtual_device "github.com/jbdemonte/virtual-device"
+	"github.com/jbdemonte/virtual-device/linux"
+)
 
 type MappingButtons map[Button]linux.Button
 
@@ -11,8 +14,8 @@ type MappingHat map[Button]HatDirection
 type MappingDigital map[Button][]InputEvent
 
 type MappingStick struct {
-	X linux.AbsoluteAxis
-	Y linux.AbsoluteAxis
+	X virtual_device.AbsAxis
+	Y virtual_device.AbsAxis
 }
 
 type MappingAnalog struct {
@@ -39,6 +42,6 @@ type InputEvent interface{}
 type MSCScanCode uint32
 
 type HatEvent struct {
-	axe   linux.AbsoluteAxis
-	value int
+	Axis  linux.AbsoluteAxis
+	Value int32
 }
