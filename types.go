@@ -34,6 +34,7 @@ type Events struct {
 	keys         []linux.Key
 	buttons      []linux.Button
 	absoluteAxes []AbsAxis
+	relativeAxes []linux.RelativeAxis
 	scanCode     bool
 	repeat       *Repeat
 	leds         []linux.Led

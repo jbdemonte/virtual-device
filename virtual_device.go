@@ -25,6 +25,7 @@ type VirtualDevice interface {
 	SetEventButtons(buttons []linux.Button) VirtualDevice
 	ActivateScanCode() VirtualDevice
 	SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice
+	SetEventRelativeAxes(relativeAxes []linux.RelativeAxis) VirtualDevice
 	SetRepeat(delay, period int32) VirtualDevice
 	SetLeds(leds []linux.Led) VirtualDevice
 	Register() error
@@ -35,6 +36,7 @@ type VirtualDevice interface {
 	KeyDown(key uint16)
 	KeyUp(key uint16)
 	SendAbsoluteEvent(absCode uint16, value int32)
+	SendRelativeEvent(relCode uint16, value int32)
 	SendScanCode(value int32)
 	SwitchLed(led linux.Led, state bool)
 }
@@ -105,6 +107,11 @@ func (vd *virtualDevice) ActivateScanCode() VirtualDevice {
 
 func (vd *virtualDevice) SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice {
 	vd.events.absoluteAxes = absoluteAxes
+	return vd
+}
+
+func (vd *virtualDevice) SetEventRelativeAxes(relativeAxes []linux.RelativeAxis) VirtualDevice {
+	vd.events.relativeAxes = relativeAxes
 	return vd
 }
 
@@ -227,7 +234,20 @@ func (vd *virtualDevice) registerEvents() error {
 		for _, event := range vd.events.absoluteAxes {
 			err = ioctl(vd.fd, linux.UI_SET_ABSBIT, uintptr(event.Axis))
 			if err != nil {
-				return fmt.Errorf("failed to register axe 0x%x: %v", event.Axis, err)
+				return fmt.Errorf("failed to register absolute axe 0x%x: %v", event.Axis, err)
+			}
+		}
+	}
+
+	if vd.events.relativeAxes != nil {
+		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_REL))
+		if err != nil {
+			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_REL: %v", err)
+		}
+		for _, axis := range vd.events.relativeAxes {
+			err = ioctl(vd.fd, linux.UI_SET_RELBIT, uintptr(axis))
+			if err != nil {
+				return fmt.Errorf("failed to register relative axe 0x%x: %v", axis, err)
 			}
 		}
 	}
@@ -366,6 +386,10 @@ func (vd *virtualDevice) KeyUp(key uint16) {
 
 func (vd *virtualDevice) SendAbsoluteEvent(absCode uint16, value int32) {
 	vd.Send(uint16(linux.EV_ABS), absCode, value)
+}
+
+func (vd *virtualDevice) SendRelativeEvent(relCode uint16, value int32) {
+	vd.Send(uint16(linux.EV_REL), relCode, value)
 }
 
 func (vd *virtualDevice) SendScanCode(value int32) {
