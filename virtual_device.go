@@ -378,5 +378,4 @@ func (vd *virtualDevice) SwitchLed(led linux.Led, state bool) {
 		value = 1
 	}
 	vd.Send(uint16(linux.EV_LED), uint16(led), value)
-
 }

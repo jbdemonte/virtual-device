@@ -7,6 +7,16 @@ import (
 )
 
 func NewStadia() VirtualGamepad {
+
+	vd := virtual_device.NewVirtualDevice()
+
+	vd.
+		SetBusType(linux.BUS_USB).
+		SetProduct(sdl.USB_PRODUCT_GOOGLE_STADIA_CONTROLLER).
+		SetVendor(sdl.USB_VENDOR_GOOGLE).
+		SetVersion(0x111).
+		SetName("Google LLC Stadia Controller rev. A")
+
 	mapping := Mapping{
 		Digital: MappingDigital{
 			ButtonSouth: []InputEvent{MSCScanCode(90001), linux.BTN_SOUTH},
@@ -46,15 +56,6 @@ func NewStadia() VirtualGamepad {
 			},
 		},
 	}
-
-	vd := virtual_device.NewVirtualDevice()
-
-	vd.
-		SetBusType(linux.BUS_USB).
-		SetProduct(sdl.USB_PRODUCT_GOOGLE_STADIA_CONTROLLER).
-		SetVendor(sdl.USB_VENDOR_GOOGLE).
-		SetVersion(0x111).
-		SetName("Google LLC Stadia Controller rev. A")
 
 	return createVirtualGamepad(vd, mapping)
 }
