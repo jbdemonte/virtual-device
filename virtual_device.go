@@ -23,7 +23,7 @@ type VirtualDevice interface {
 	SetName(name string) VirtualDevice
 	SetEventKeys(keys []linux.Key) VirtualDevice
 	SetEventButtons(buttons []linux.Button) VirtualDevice
-	SetEventScanCode(scanCodes []uint32) VirtualDevice
+	ActivateScanCode() VirtualDevice
 	SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice
 	Register() error
 	Unregister() error
@@ -95,8 +95,8 @@ func (vd *virtualDevice) SetEventButtons(buttons []linux.Button) VirtualDevice {
 	return vd
 }
 
-func (vd *virtualDevice) SetEventScanCode(scanCodes []uint32) VirtualDevice {
-	vd.events.scanCodes = scanCodes
+func (vd *virtualDevice) ActivateScanCode() VirtualDevice {
+	vd.events.scanCode = true
 	return vd
 }
 
@@ -193,7 +193,7 @@ func (vd *virtualDevice) registerEvents() error {
 		}
 	}
 
-	if vd.events.scanCodes != nil && len(vd.events.scanCodes) > 0 {
+	if vd.events.scanCode {
 		err = ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_MSC))
 		if err != nil {
 			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_MSC: %v", err)

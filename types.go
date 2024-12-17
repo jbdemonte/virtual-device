@@ -28,8 +28,8 @@ func (a AbsAxis) Denormalize(value float32) int32 {
 type Events struct {
 	keys         []linux.Key
 	buttons      []linux.Button
-	scanCodes    []uint32
 	absoluteAxes []AbsAxis
+	scanCode     bool
 }
 
 type virtualDevice struct {

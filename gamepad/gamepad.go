@@ -48,7 +48,6 @@ func (v *virtualGamepad) setEvents() {
 	keys := make([]linux.Key, 0)
 	absoluteAxes := make([]virtual_device.AbsAxis, 0)
 	hatEvents := make([]HatEvent, 0)
-	scanCodes := make([]uint32, 0)
 
 	for _, events := range v.mapping.Digital {
 		for _, event := range events {
@@ -58,8 +57,7 @@ func (v *virtualGamepad) setEvents() {
 			case linux.Key:
 				keys = append(keys, e)
 			case MSCScanCode:
-				fmt.Printf("scanCodes %d\n", e)
-				scanCodes = append(scanCodes, uint32(e))
+				v.device.ActivateScanCode()
 			case HatEvent:
 				hatEvents = append(hatEvents, e)
 			case virtual_device.AbsAxis:
@@ -86,8 +84,7 @@ func (v *virtualGamepad) setEvents() {
 
 	v.device.SetEventButtons(buttons)
 	v.device.SetEventKeys(keys)
-	v.device.SetEventScanCode(scanCodes)
-
+	v.device.ActivateScanCode()
 	v.device.SetEventAbsoluteAxes(absoluteAxes)
 }
 
