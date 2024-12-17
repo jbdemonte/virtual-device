@@ -15,6 +15,11 @@ type AbsAxis struct {
 	Fuzz  int32
 }
 
+type Repeat struct {
+	delay  int32
+	period int32
+}
+
 func (a AbsAxis) Denormalize(value float32) int32 {
 	if value < -1 {
 		value = -1
@@ -30,6 +35,8 @@ type Events struct {
 	buttons      []linux.Button
 	absoluteAxes []AbsAxis
 	scanCode     bool
+	repeat       *Repeat
+	leds         []linux.Led
 }
 
 type virtualDevice struct {

@@ -25,6 +25,8 @@ type VirtualDevice interface {
 	SetEventButtons(buttons []linux.Button) VirtualDevice
 	ActivateScanCode() VirtualDevice
 	SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice
+	SetRepeat(delay, period int32) VirtualDevice
+	SetLeds(leds []linux.Led) VirtualDevice
 	Register() error
 	Unregister() error
 	Send(evType, code uint16, value int32)
@@ -34,6 +36,7 @@ type VirtualDevice interface {
 	KeyUp(key uint16)
 	SendAbsoluteEvent(absCode uint16, value int32)
 	SendScanCode(value int32)
+	SwitchLed(led linux.Led, state bool)
 }
 
 func NewVirtualDevice() VirtualDevice {
@@ -102,6 +105,17 @@ func (vd *virtualDevice) ActivateScanCode() VirtualDevice {
 
 func (vd *virtualDevice) SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice {
 	vd.events.absoluteAxes = absoluteAxes
+	return vd
+}
+
+func (vd *virtualDevice) SetRepeat(delay, period int32) VirtualDevice {
+	vd.events.repeat = &Repeat{delay, period}
+	return vd
+
+}
+
+func (vd *virtualDevice) SetLeds(leds []linux.Led) VirtualDevice {
+	vd.events.leds = leds
 	return vd
 }
 
@@ -218,6 +232,26 @@ func (vd *virtualDevice) registerEvents() error {
 		}
 	}
 
+	if vd.events.repeat != nil {
+		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_REP))
+		if err != nil {
+			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_REP: %v", err)
+		}
+	}
+
+	if len(vd.events.leds) > 0 {
+		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_LED))
+		if err != nil {
+			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_LED: %v", err)
+		}
+		for _, led := range vd.events.leds {
+			err := ioctl(vd.fd, linux.UI_SET_LEDBIT, uintptr(led))
+			if err != nil {
+				return fmt.Errorf("failed to set UI_SET_LEDBIT, 0x%x: %v", led, err)
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -232,6 +266,12 @@ func (vd *virtualDevice) pull() {
 			}
 		}
 	}()
+
+	if vd.events.repeat != nil {
+		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_DELAY), vd.events.repeat.delay)
+		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_PERIOD), vd.events.repeat.period)
+		vd.SendSync()
+	}
 }
 
 func (vd *virtualDevice) writeEvent(event *linux.InputEvent) error {
@@ -330,4 +370,13 @@ func (vd *virtualDevice) SendAbsoluteEvent(absCode uint16, value int32) {
 
 func (vd *virtualDevice) SendScanCode(value int32) {
 	vd.Send(uint16(linux.EV_MSC), uint16(linux.MSC_SCAN), value)
+}
+
+func (vd *virtualDevice) SwitchLed(led linux.Led, state bool) {
+	value := int32(0)
+	if state {
+		value = 1
+	}
+	vd.Send(uint16(linux.EV_LED), uint16(led), value)
+
 }
