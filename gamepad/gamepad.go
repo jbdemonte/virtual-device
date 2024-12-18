@@ -6,33 +6,78 @@ import (
 	"github.com/jbdemonte/virtual-device/linux"
 )
 
-func createVirtualGamepad(device virtual_device.VirtualDevice, mapping Mapping) VirtualGamepad {
+type VirtualGamepad interface {
+	Register() error
+	Unregister() error
+
+	Press(button Button)
+	Release(button Button)
+
+	MoveLeftStick(x, y float32)
+	MoveLeftStickX(x float32)
+	MoveLeftStickY(y float32)
+
+	MoveRightStick(x, y float32)
+	MoveRightStickX(x float32)
+	MoveRightStickY(y float32)
+}
+
+type VirtualGamepadFactory interface {
+	WithDevice(device virtual_device.VirtualDevice) VirtualGamepadFactory
+	WithDigital(mapping MappingDigital) VirtualGamepadFactory
+	WithLeftStick(mapping MappingStick) VirtualGamepadFactory
+	WithRightStick(mapping MappingStick) VirtualGamepadFactory
+	Create() VirtualGamepad
+}
+
+type virtualGamepadFactory struct {
+	device     virtual_device.VirtualDevice
+	digital    MappingDigital
+	leftStick  *MappingStick
+	rightStick *MappingStick
+}
+
+func NewVirtualGamepadFactory() VirtualGamepadFactory {
+	return &virtualGamepadFactory{}
+}
+
+func (f *virtualGamepadFactory) WithDevice(device virtual_device.VirtualDevice) VirtualGamepadFactory {
+	f.device = device
+	return f
+}
+
+func (f *virtualGamepadFactory) WithDigital(mapping MappingDigital) VirtualGamepadFactory {
+	f.digital = mapping
+	return f
+}
+
+func (f *virtualGamepadFactory) WithLeftStick(mapping MappingStick) VirtualGamepadFactory {
+	f.leftStick = &mapping
+	return f
+}
+
+func (f *virtualGamepadFactory) WithRightStick(mapping MappingStick) VirtualGamepadFactory {
+	f.rightStick = &mapping
+	return f
+}
+
+func (f *virtualGamepadFactory) Create() VirtualGamepad {
 	vg := &virtualGamepad{
-		device:  device,
-		mapping: mapping,
+		device:     f.device,
+		digital:    f.digital,
+		leftStick:  f.leftStick,
+		rightStick: f.rightStick,
 	}
 
 	vg.init()
 	return vg
 }
 
-type VirtualGamepad interface {
-	Register() error
-	Unregister() error
-	Press(button Button)
-	Release(button Button)
-	MoveLeftStick(x, y float32)
-	MoveLeftStickX(x float32)
-	MoveLeftStickY(y float32)
-	MoveRightStick(x, y float32)
-	MoveRightStickX(x float32)
-	MoveRightStickY(y float32)
-}
-
 type virtualGamepad struct {
-	device  virtual_device.VirtualDevice
-	mapping Mapping
-	config  Config
+	device     virtual_device.VirtualDevice
+	digital    MappingDigital
+	leftStick  *MappingStick
+	rightStick *MappingStick
 }
 
 func (vg *virtualGamepad) Register() error {
@@ -49,7 +94,7 @@ func (vg *virtualGamepad) init() {
 	absoluteAxes := make([]virtual_device.AbsAxis, 0)
 	hatEvents := make([]HatEvent, 0)
 
-	for _, events := range vg.mapping.Digital {
+	for _, events := range vg.digital {
 		for _, event := range events {
 			switch e := event.(type) {
 			case linux.Button:
@@ -57,7 +102,7 @@ func (vg *virtualGamepad) init() {
 			case linux.Key:
 				keys = append(keys, e)
 			case MSCScanCode:
-				vg.device.ActivateScanCode()
+				vg.device.WithScanCode()
 			case HatEvent:
 				hatEvents = append(hatEvents, e)
 			case virtual_device.AbsAxis:
@@ -68,13 +113,19 @@ func (vg *virtualGamepad) init() {
 		}
 	}
 
-	if vg.mapping.Analog != nil {
+	if vg.leftStick != nil {
 		absoluteAxes = append(
 			absoluteAxes,
-			vg.mapping.Analog.Left.X,
-			vg.mapping.Analog.Left.Y,
-			vg.mapping.Analog.Right.X,
-			vg.mapping.Analog.Right.Y,
+			vg.leftStick.X,
+			vg.leftStick.Y,
+		)
+	}
+
+	if vg.rightStick != nil {
+		absoluteAxes = append(
+			absoluteAxes,
+			vg.rightStick.X,
+			vg.rightStick.Y,
 		)
 	}
 
@@ -82,104 +133,104 @@ func (vg *virtualGamepad) init() {
 		absoluteAxes = append(absoluteAxes, convertHatToAbsAxis(hatEvents)...)
 	}
 
-	vg.device.SetEventButtons(buttons)
-	vg.device.SetEventKeys(keys)
-	vg.device.ActivateScanCode()
-	vg.device.SetEventAbsoluteAxes(absoluteAxes)
+	vg.device.WithButtons(buttons)
+	vg.device.WithKeys(keys)
+	vg.device.WithScanCode()
+	vg.device.WithAbsAxes(absoluteAxes)
 }
 
 func (vg *virtualGamepad) Press(button Button) {
-	events, exist := vg.mapping.Digital[button]
+	events, exist := vg.digital[button]
 	if !exist {
 		fmt.Printf("button not assigned (0x%x)\n", button)
 	}
 	for _, event := range events {
 		switch e := event.(type) {
 		case linux.Button:
-			vg.device.KeyDown(uint16(e))
+			vg.device.KeyPress(uint16(e))
 		case linux.Key:
-			vg.device.KeyDown(uint16(e))
+			vg.device.KeyPress(uint16(e))
 		case MSCScanCode:
-			vg.device.SendScanCode(int32(e))
+			vg.device.ScanCode(int32(e))
 		case HatEvent:
-			vg.device.SendAbsoluteEvent(uint16(e.Axis), e.Value)
+			vg.device.Abs(uint16(e.Axis), e.Value)
 		case virtual_device.AbsAxis:
-			vg.device.SendAbsoluteEvent(uint16(e.Axis), e.Max)
+			vg.device.Abs(uint16(e.Axis), e.Max)
 		default:
 			fmt.Println("Unknown event type")
 		}
 	}
-	vg.device.SendSync()
+	vg.device.Sync()
 }
 
 func (vg *virtualGamepad) Release(button Button) {
-	events, exist := vg.mapping.Digital[button]
+	events, exist := vg.digital[button]
 	if !exist {
 		fmt.Printf("button not assigned (0x%x)\n", button)
 	}
 	for _, event := range events {
 		switch e := event.(type) {
 		case linux.Button:
-			vg.device.KeyUp(uint16(e))
+			vg.device.KeyRelease(uint16(e))
 		case linux.Key:
-			vg.device.KeyUp(uint16(e))
+			vg.device.KeyRelease(uint16(e))
 		case MSCScanCode:
-			vg.device.SendScanCode(int32(e))
+			vg.device.ScanCode(int32(e))
 		case HatEvent:
-			vg.device.SendAbsoluteEvent(uint16(e.Axis), 0)
+			vg.device.Abs(uint16(e.Axis), 0)
 		case virtual_device.AbsAxis:
-			vg.device.SendAbsoluteEvent(uint16(e.Axis), e.Min)
+			vg.device.Abs(uint16(e.Axis), e.Min)
 		default:
 			fmt.Println("Unknown event type")
 		}
 	}
-	vg.device.SendSync()
+	vg.device.Sync()
 }
 
 func (vg *virtualGamepad) moveStick(stick *MappingStick, x, y float32) {
-	vg.device.SendAbsoluteEvent(uint16(stick.X.Axis), stick.X.Denormalize(x))
-	vg.device.SendAbsoluteEvent(uint16(stick.Y.Axis), stick.Y.Denormalize(y))
-	vg.device.SendSync()
+	vg.device.Abs(uint16(stick.X.Axis), stick.X.Denormalize(x))
+	vg.device.Abs(uint16(stick.Y.Axis), stick.Y.Denormalize(y))
+	vg.device.Sync()
 
 }
 
 func (vg *virtualGamepad) moveAxis(absAxis *virtual_device.AbsAxis, p float32) {
-	vg.device.SendAbsoluteEvent(uint16(absAxis.Axis), absAxis.Denormalize(p))
-	vg.device.SendSync()
+	vg.device.Abs(uint16(absAxis.Axis), absAxis.Denormalize(p))
+	vg.device.Sync()
 }
 
 func (vg *virtualGamepad) MoveLeftStick(x, y float32) {
-	if vg.mapping.Analog != nil {
-		vg.moveStick(&vg.mapping.Analog.Left, x, y)
+	if vg.leftStick != nil {
+		vg.moveStick(vg.leftStick, x, y)
 	}
 }
 
 func (vg *virtualGamepad) MoveLeftStickX(x float32) {
-	if vg.mapping.Analog != nil {
-		vg.moveAxis(&vg.mapping.Analog.Left.X, x)
+	if vg.leftStick != nil {
+		vg.moveAxis(&vg.leftStick.X, x)
 	}
 }
 
 func (vg *virtualGamepad) MoveLeftStickY(y float32) {
-	if vg.mapping.Analog != nil {
-		vg.moveAxis(&vg.mapping.Analog.Left.Y, y)
+	if vg.leftStick != nil {
+		vg.moveAxis(&vg.leftStick.Y, y)
 	}
 }
 
 func (vg *virtualGamepad) MoveRightStick(x, y float32) {
-	if vg.mapping.Analog != nil {
-		vg.moveStick(&vg.mapping.Analog.Right, x, y)
+	if vg.rightStick != nil {
+		vg.moveStick(vg.rightStick, x, y)
 	}
 }
 
 func (vg *virtualGamepad) MoveRightStickX(x float32) {
-	if vg.mapping.Analog != nil {
-		vg.moveAxis(&vg.mapping.Analog.Right.X, x)
+	if vg.rightStick != nil {
+		vg.moveAxis(&vg.rightStick.X, x)
 	}
 }
 
 func (vg *virtualGamepad) MoveRightStickY(y float32) {
-	if vg.mapping.Analog != nil {
-		vg.moveAxis(&vg.mapping.Analog.Right.Y, y)
+	if vg.rightStick != nil {
+		vg.moveAxis(&vg.rightStick.Y, y)
 	}
 }

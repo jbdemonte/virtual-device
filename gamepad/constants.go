@@ -19,8 +19,10 @@ const (
 
 	ButtonL1
 	ButtonR1
+
 	ButtonL2
 	ButtonR2
+
 	ButtonL3
 	ButtonR3
 
@@ -32,11 +34,4 @@ const (
 	ButtonFiller2
 	ButtonFiller3
 	ButtonFiller4
-)
-
-const (
-	HatUp HatDirection = iota + 1
-	HatDown
-	HatLeft
-	HatRight
 )

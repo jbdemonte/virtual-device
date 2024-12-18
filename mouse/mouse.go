@@ -9,41 +9,108 @@ import (
 type VirtualMouse interface {
 	Register() error
 	Unregister() error
-	Move(x, y int32)
-	MoveX(x int32)
-	MoveY(Y int32)
-	Wheel(delta int32)
-	HWheel(delta int32)
-	ButtonDown(button linux.Button)
-	ButtonUp(button linux.Button)
+
+	Move(deltaX, deltaY int32)
+	MoveX(deltaX int32)
+	MoveY(deltaY int32)
+
+	ScrollVertical(delta int32)
+	ScrollHorizontal(delta int32)
+
+	ButtonPress(button linux.Button)
+	ButtonRelease(button linux.Button)
+
 	ScrollUp()
 	ScrollDown()
 	ScrollLeft()
 	ScrollRight()
+
 	Click(btn linux.Button)
 	DoubleClick(btn linux.Button)
+
 	ClickLeft()
 	ClickRight()
 	ClickMiddle()
+
 	DoubleClickLeft()
 	DoubleClickRight()
 	DoubleClickMiddle()
 }
 
-type virtualMouse struct {
-	device virtual_device.VirtualDevice
-	config Config
+type VirtualMouseFactory interface {
+	WithDevice(device virtual_device.VirtualDevice) VirtualMouseFactory
+	WithClickDelay(delay int) VirtualMouseFactory
+	WithDoubleClickDelay(delay int) VirtualMouseFactory
+	WithHighResStepVertical(step int32) VirtualMouseFactory
+	WithHighResStepHorizontal(step int32) VirtualMouseFactory
+	Create() VirtualMouse
 }
 
-func createVirtualMouse(device virtual_device.VirtualDevice, config Config) VirtualMouse {
-	if config.clickDelay == 0 {
-		config.clickDelay = 50
+func NewVirtualMouseFactory() VirtualMouseFactory {
+	return &virtualMouseFactory{
+		clickDelay:       -1,
+		doubleClickDelay: -1,
 	}
-	if config.doubleClickDelay == 0 {
-		config.doubleClickDelay = 250
+}
+
+type virtualMouseFactory struct {
+	device                virtual_device.VirtualDevice
+	highResStepVertical   int32
+	highResStepHorizontal int32
+	clickDelay            int
+	doubleClickDelay      int
+}
+
+func (f *virtualMouseFactory) WithDevice(device virtual_device.VirtualDevice) VirtualMouseFactory {
+	f.device = device
+	return f
+}
+
+func (f *virtualMouseFactory) WithClickDelay(delay int) VirtualMouseFactory {
+	f.clickDelay = delay
+	return f
+}
+
+func (f *virtualMouseFactory) WithDoubleClickDelay(delay int) VirtualMouseFactory {
+	f.doubleClickDelay = delay
+	return f
+}
+
+func (f *virtualMouseFactory) WithHighResStepVertical(step int32) VirtualMouseFactory {
+	f.highResStepVertical = step
+	return f
+}
+
+func (f *virtualMouseFactory) WithHighResStepHorizontal(step int32) VirtualMouseFactory {
+	f.highResStepHorizontal = step
+	return f
+}
+
+func (f *virtualMouseFactory) Create() VirtualMouse {
+	clickDelay := f.clickDelay
+	if clickDelay < 0 {
+		clickDelay = 50
 	}
-	vm := &virtualMouse{device, config}
-	return vm
+
+	doubleClickDelay := f.doubleClickDelay
+	if doubleClickDelay < 0 {
+		doubleClickDelay = 250
+	}
+	return &virtualMouse{
+		device:                f.device,
+		clickDelay:            clickDelay,
+		doubleClickDelay:      doubleClickDelay,
+		highResStepVertical:   f.highResStepVertical,
+		highResStepHorizontal: f.highResStepHorizontal,
+	}
+}
+
+type virtualMouse struct {
+	device                virtual_device.VirtualDevice
+	highResStepVertical   int32
+	highResStepHorizontal int32
+	clickDelay            int
+	doubleClickDelay      int
 }
 
 func (vm *virtualMouse) Register() error {
@@ -54,73 +121,73 @@ func (vm *virtualMouse) Unregister() error {
 	return vm.device.Unregister()
 }
 
-func (vm *virtualMouse) Move(x, y int32) {
-	vm.device.SendRelativeEvent(uint16(linux.REL_X), x)
-	vm.device.SendRelativeEvent(uint16(linux.REL_Y), y)
-	vm.device.SendSync()
+func (vm *virtualMouse) Move(deltaX, deltaY int32) {
+	vm.device.Rel(uint16(linux.REL_X), deltaX)
+	vm.device.Rel(uint16(linux.REL_Y), deltaY)
+	vm.device.Sync()
 }
 
-func (vm *virtualMouse) MoveX(x int32) {
-	vm.device.SendRelativeEvent(uint16(linux.REL_X), x)
-	vm.device.SendSync()
+func (vm *virtualMouse) MoveX(deltaX int32) {
+	vm.device.Rel(uint16(linux.REL_X), deltaX)
+	vm.device.Sync()
 }
 
-func (vm *virtualMouse) MoveY(y int32) {
-	vm.device.SendRelativeEvent(uint16(linux.REL_Y), y)
-	vm.device.SendSync()
+func (vm *virtualMouse) MoveY(deltaY int32) {
+	vm.device.Rel(uint16(linux.REL_Y), deltaY)
+	vm.device.Sync()
 }
 
-func (vm *virtualMouse) Wheel(delta int32) {
-	vm.device.SendRelativeEvent(uint16(linux.REL_WHEEL), delta)
-	if vm.config.highResStep != 0 {
-		vm.device.SendRelativeEvent(uint16(linux.REL_WHEEL_HI_RES), delta*vm.config.highResStep)
+func (vm *virtualMouse) ScrollVertical(delta int32) {
+	vm.device.Rel(uint16(linux.REL_WHEEL), delta)
+	if vm.highResStepVertical != 0 {
+		vm.device.Rel(uint16(linux.REL_WHEEL_HI_RES), delta*vm.highResStepVertical)
 	}
-	vm.device.SendSync()
+	vm.device.Sync()
 }
 
-func (vm *virtualMouse) HWheel(delta int32) {
-	vm.device.SendRelativeEvent(uint16(linux.REL_HWHEEL), delta)
-	if vm.config.highResHStep != 0 {
-		vm.device.SendRelativeEvent(uint16(linux.REL_HWHEEL_HI_RES), delta*vm.config.highResHStep)
+func (vm *virtualMouse) ScrollHorizontal(delta int32) {
+	vm.device.Rel(uint16(linux.REL_HWHEEL), delta)
+	if vm.highResStepHorizontal != 0 {
+		vm.device.Rel(uint16(linux.REL_HWHEEL_HI_RES), delta*vm.highResStepHorizontal)
 	}
-	vm.device.SendSync()
+	vm.device.Sync()
 }
 
-func (vm *virtualMouse) ButtonDown(button linux.Button) {
-	vm.device.KeyDown(uint16(button))
-	vm.device.SendSync()
+func (vm *virtualMouse) ButtonPress(button linux.Button) {
+	vm.device.KeyPress(uint16(button))
+	vm.device.Sync()
 }
 
-func (vm *virtualMouse) ButtonUp(button linux.Button) {
-	vm.device.KeyUp(uint16(button))
-	vm.device.SendSync()
+func (vm *virtualMouse) ButtonRelease(button linux.Button) {
+	vm.device.KeyRelease(uint16(button))
+	vm.device.Sync()
 }
 
 func (vm *virtualMouse) ScrollUp() {
-	vm.Wheel(1)
+	vm.ScrollVertical(1)
 }
 
 func (vm *virtualMouse) ScrollDown() {
-	vm.Wheel(-1)
+	vm.ScrollVertical(-1)
 }
 
 func (vm *virtualMouse) ScrollLeft() {
-	vm.HWheel(-1)
+	vm.ScrollHorizontal(-1)
 }
 
 func (vm *virtualMouse) ScrollRight() {
-	vm.HWheel(1)
+	vm.ScrollHorizontal(1)
 }
 
 func (vm *virtualMouse) Click(btn linux.Button) {
-	vm.ButtonDown(btn)
-	time.Sleep(time.Millisecond * time.Duration(vm.config.clickDelay))
-	vm.ButtonUp(btn)
+	vm.ButtonPress(btn)
+	time.Sleep(time.Millisecond * time.Duration(vm.clickDelay))
+	vm.ButtonRelease(btn)
 }
 
 func (vm *virtualMouse) DoubleClick(btn linux.Button) {
 	vm.Click(btn)
-	time.Sleep(time.Millisecond * time.Duration(vm.config.doubleClickDelay))
+	time.Sleep(time.Millisecond * time.Duration(vm.doubleClickDelay))
 	vm.Click(btn)
 }
 

@@ -8,32 +8,75 @@ import (
 type VirtualKeyboard interface {
 	Register() error
 	Unregister() error
-	KeyDown(key linux.Key)
+
 	KeyPress(key linux.Key)
-	KeyUp(key linux.Key)
-	SwitchLed(led linux.Led, state bool)
+	KeyRelease(key linux.Key)
+	Led(led linux.Led, state bool)
+}
+
+type VirtualKeyboardFactory interface {
+	WithDevice(device virtual_device.VirtualDevice) VirtualKeyboardFactory
+	WithScanCode() VirtualKeyboardFactory
+	WithKeys(keys []linux.Key) VirtualKeyboardFactory
+	WithLEDs(leds []linux.Led) VirtualKeyboardFactory
+	WithRepeat(delay, period int32) VirtualKeyboardFactory
+	Create() VirtualKeyboard
+}
+
+func NewVirtualKeyboardFactory() VirtualKeyboardFactory {
+	return &virtualKeyboardFactory{}
+}
+
+type virtualKeyboardFactory struct {
+	device   virtual_device.VirtualDevice
+	scanCode bool
+	keys     []linux.Key
+	leds     []linux.Led
+	repeat   *Repeat
+}
+
+func (f *virtualKeyboardFactory) WithDevice(device virtual_device.VirtualDevice) VirtualKeyboardFactory {
+	f.device = device
+	return f
+}
+
+func (f *virtualKeyboardFactory) WithScanCode() VirtualKeyboardFactory {
+	f.scanCode = true
+	return f
+}
+
+func (f *virtualKeyboardFactory) WithKeys(keys []linux.Key) VirtualKeyboardFactory {
+	f.keys = keys
+	return f
+}
+
+func (f *virtualKeyboardFactory) WithLEDs(leds []linux.Led) VirtualKeyboardFactory {
+	f.leds = leds
+	return f
+}
+
+func (f *virtualKeyboardFactory) WithRepeat(delay, period int32) VirtualKeyboardFactory {
+	f.repeat = &Repeat{delay, period}
+	return f
+}
+
+func (f *virtualKeyboardFactory) Create() VirtualKeyboard {
+	vk := &virtualKeyboard{
+		device: f.device,
+	}
+	if f.scanCode {
+		vk.device.WithScanCode()
+	}
+	if f.repeat != nil {
+		vk.device.WithRepeat(f.repeat.delay, f.repeat.period)
+	}
+	vk.device.WithKeys(f.keys)
+	vk.device.WithLEDs(f.leds)
+	return vk
 }
 
 type virtualKeyboard struct {
 	device virtual_device.VirtualDevice
-	config Config
-}
-
-func createVirtualKeyboard(device virtual_device.VirtualDevice, config Config) VirtualKeyboard {
-	vk := &virtualKeyboard{device, config}
-	vk.init()
-	return vk
-}
-
-func (vk *virtualKeyboard) init() {
-	if vk.config.scanCode {
-		vk.device.ActivateScanCode()
-	}
-	if vk.config.repeat != nil {
-		vk.device.SetRepeat(vk.config.repeat.delay, vk.config.repeat.period)
-	}
-	vk.device.SetEventKeys(vk.config.keys)
-	vk.device.SetLeds(vk.config.leds)
 }
 
 func (vk *virtualKeyboard) Register() error {
@@ -44,18 +87,14 @@ func (vk *virtualKeyboard) Unregister() error {
 	return vk.device.Unregister()
 }
 
-func (vk *virtualKeyboard) KeyDown(key linux.Key) {
-	vk.device.KeyDown(uint16(key))
-}
-
 func (vk *virtualKeyboard) KeyPress(key linux.Key) {
 	vk.device.KeyPress(uint16(key))
 }
 
-func (vk *virtualKeyboard) KeyUp(key linux.Key) {
-	vk.device.KeyUp(uint16(key))
+func (vk *virtualKeyboard) KeyRelease(key linux.Key) {
+	vk.device.KeyRelease(uint16(key))
 }
 
-func (vk *virtualKeyboard) SwitchLed(led linux.Led, state bool) {
-	vk.device.SwitchLed(led, state)
+func (vk *virtualKeyboard) Led(led linux.Led, state bool) {
+	vk.device.Led(led, state)
 }

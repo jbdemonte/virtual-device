@@ -13,32 +13,33 @@ import (
 )
 
 type VirtualDevice interface {
-	SetPath(path string) VirtualDevice
-	SetMode(mode os.FileMode) VirtualDevice
-	SetQueueLength(queueLength int) VirtualDevice
-	SetBusType(busType linux.BusType) VirtualDevice
-	SetVendor(vendor sdl.Vendor) VirtualDevice
-	SetProduct(product sdl.Product) VirtualDevice
-	SetVersion(version uint16) VirtualDevice
-	SetName(name string) VirtualDevice
-	SetEventKeys(keys []linux.Key) VirtualDevice
-	SetEventButtons(buttons []linux.Button) VirtualDevice
-	ActivateScanCode() VirtualDevice
-	SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice
-	SetEventRelativeAxes(relativeAxes []linux.RelativeAxis) VirtualDevice
-	SetRepeat(delay, period int32) VirtualDevice
-	SetLeds(leds []linux.Led) VirtualDevice
+	WithPath(path string) VirtualDevice
+	WithMode(mode os.FileMode) VirtualDevice
+	WithQueueLen(queueLen int) VirtualDevice
+	WithBusType(busType linux.BusType) VirtualDevice
+	WithVendor(vendor sdl.Vendor) VirtualDevice
+	WithProduct(product sdl.Product) VirtualDevice
+	WithVersion(version uint16) VirtualDevice
+	WithName(name string) VirtualDevice
+	WithKeys(keys []linux.Key) VirtualDevice
+	WithButtons(buttons []linux.Button) VirtualDevice
+	WithScanCode() VirtualDevice
+	WithAbsAxes(absoluteAxes []AbsAxis) VirtualDevice
+	WithRelAxes(relativeAxes []linux.RelativeAxis) VirtualDevice
+	WithRepeat(delay, period int32) VirtualDevice
+	WithLEDs(leds []linux.Led) VirtualDevice
+
 	Register() error
 	Unregister() error
+
 	Send(evType, code uint16, value int32)
-	SendSync()
+	Sync()
 	KeyPress(key uint16)
-	KeyDown(key uint16)
-	KeyUp(key uint16)
-	SendAbsoluteEvent(absCode uint16, value int32)
-	SendRelativeEvent(relCode uint16, value int32)
-	SendScanCode(value int32)
-	SwitchLed(led linux.Led, state bool)
+	KeyRelease(key uint16)
+	Abs(absCode uint16, value int32)
+	Rel(relCode uint16, value int32)
+	ScanCode(value int32)
+	Led(led linux.Led, state bool)
 }
 
 func NewVirtualDevice() VirtualDevice {
@@ -50,78 +51,78 @@ func NewVirtualDevice() VirtualDevice {
 	}
 }
 
-func (vd *virtualDevice) SetPath(path string) VirtualDevice {
+func (vd *virtualDevice) WithPath(path string) VirtualDevice {
 	vd.path = path
 	return vd
 }
 
-func (vd *virtualDevice) SetMode(mode os.FileMode) VirtualDevice {
+func (vd *virtualDevice) WithMode(mode os.FileMode) VirtualDevice {
 	vd.mode = mode
 	return vd
 }
 
-func (vd *virtualDevice) SetQueueLength(queueLen int) VirtualDevice {
+func (vd *virtualDevice) WithQueueLen(queueLen int) VirtualDevice {
 	vd.queueLen = queueLen
 	return vd
 }
 
-func (vd *virtualDevice) SetBusType(busType linux.BusType) VirtualDevice {
+func (vd *virtualDevice) WithBusType(busType linux.BusType) VirtualDevice {
 	vd.id.BusType = busType
 	return vd
 }
 
-func (vd *virtualDevice) SetVendor(vendor uint16) VirtualDevice {
+func (vd *virtualDevice) WithVendor(vendor uint16) VirtualDevice {
 	vd.id.Vendor = vendor
 	return vd
 }
 
-func (vd *virtualDevice) SetProduct(product uint16) VirtualDevice {
+func (vd *virtualDevice) WithProduct(product uint16) VirtualDevice {
 	vd.id.Product = product
 	return vd
 }
 
-func (vd *virtualDevice) SetVersion(version uint16) VirtualDevice {
+func (vd *virtualDevice) WithVersion(version uint16) VirtualDevice {
 	vd.id.Version = version
 	return vd
 }
 
-func (vd *virtualDevice) SetName(name string) VirtualDevice {
+func (vd *virtualDevice) WithName(name string) VirtualDevice {
 	vd.name = name
 	return vd
 }
 
-func (vd *virtualDevice) SetEventKeys(keys []linux.Key) VirtualDevice {
+func (vd *virtualDevice) WithKeys(keys []linux.Key) VirtualDevice {
 	vd.events.keys = keys
 	return vd
 }
 
-func (vd *virtualDevice) SetEventButtons(buttons []linux.Button) VirtualDevice {
+func (vd *virtualDevice) WithButtons(buttons []linux.Button) VirtualDevice {
 	vd.events.buttons = buttons
 	return vd
 }
 
-func (vd *virtualDevice) ActivateScanCode() VirtualDevice {
+func (vd *virtualDevice) WithScanCode() VirtualDevice {
 	vd.events.scanCode = true
 	return vd
 }
 
-func (vd *virtualDevice) SetEventAbsoluteAxes(absoluteAxes []AbsAxis) VirtualDevice {
+func (vd *virtualDevice) WithAbsAxes(absoluteAxes []AbsAxis) VirtualDevice {
 	vd.events.absoluteAxes = absoluteAxes
 	return vd
 }
 
-func (vd *virtualDevice) SetEventRelativeAxes(relativeAxes []linux.RelativeAxis) VirtualDevice {
+func (vd *virtualDevice) WithRelAxes(relativeAxes []linux.RelativeAxis) VirtualDevice {
 	vd.events.relativeAxes = relativeAxes
 	return vd
 }
 
-func (vd *virtualDevice) SetRepeat(delay, period int32) VirtualDevice {
+func (vd *virtualDevice) WithRepeat(delay, period int32) VirtualDevice {
 	vd.events.repeat = &Repeat{delay, period}
 	return vd
 
 }
 
-func (vd *virtualDevice) SetLeds(leds []linux.Led) VirtualDevice {
+func (vd *virtualDevice) WithLEDs(leds []linux.Led) VirtualDevice {
 	vd.events.leds = leds
 	return vd
 }
@@ -290,7 +291,7 @@ func (vd *virtualDevice) pull() {
 	if vd.events.repeat != nil {
 		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_DELAY), vd.events.repeat.delay)
 		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_PERIOD), vd.events.repeat.period)
-		vd.SendSync()
+		vd.Sync()
 	}
 }
 
@@ -366,37 +367,31 @@ func (vd *virtualDevice) Send(evType, code uint16, value int32) {
 	}
 }
 
-func (vd *virtualDevice) SendSync() {
+func (vd *virtualDevice) Sync() {
 	vd.Send(uint16(linux.EV_SYN), uint16(linux.SYN_REPORT), 0)
 }
 
 func (vd *virtualDevice) KeyPress(key uint16) {
-	vd.KeyDown(key)
-	time.Sleep(time.Millisecond * 100)
-	vd.KeyUp(key)
-}
-
-func (vd *virtualDevice) KeyDown(key uint16) {
 	vd.Send(uint16(linux.EV_KEY), key, 1)
 }
 
-func (vd *virtualDevice) KeyUp(key uint16) {
+func (vd *virtualDevice) KeyRelease(key uint16) {
 	vd.Send(uint16(linux.EV_KEY), key, 0)
 }
 
-func (vd *virtualDevice) SendAbsoluteEvent(absCode uint16, value int32) {
+func (vd *virtualDevice) Abs(absCode uint16, value int32) {
 	vd.Send(uint16(linux.EV_ABS), absCode, value)
 }
 
-func (vd *virtualDevice) SendRelativeEvent(relCode uint16, value int32) {
+func (vd *virtualDevice) Rel(relCode uint16, value int32) {
 	vd.Send(uint16(linux.EV_REL), relCode, value)
 }
 
-func (vd *virtualDevice) SendScanCode(value int32) {
+func (vd *virtualDevice) ScanCode(value int32) {
 	vd.Send(uint16(linux.EV_MSC), uint16(linux.MSC_SCAN), value)
 }
 
-func (vd *virtualDevice) SwitchLed(led linux.Led, state bool) {
+func (vd *virtualDevice) Led(led linux.Led, state bool) {
 	value := int32(0)
 	if state {
 		value = 1
