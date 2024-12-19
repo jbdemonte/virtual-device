@@ -12,8 +12,8 @@ func NewStadia() VirtualGamepad {
 			virtual_device.
 				NewVirtualDevice().
 				WithBusType(linux.BUS_USB).
-				WithProduct(sdl.USB_PRODUCT_GOOGLE_STADIA_CONTROLLER).
 				WithVendor(sdl.USB_VENDOR_GOOGLE).
+				WithProduct(sdl.USB_PRODUCT_GOOGLE_STADIA_CONTROLLER).
 				WithVersion(0x111).
 				WithName("Google LLC Stadia Controller rev. A"),
 		).

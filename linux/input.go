@@ -55,3 +55,19 @@ const (
 	BUS_INTEL_ISHTP BusType = 0x1F
 	BUS_AMD_SFH     BusType = 0x20
 )
+
+// input_absinfo from https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h#L93
+type InputAbsInfo struct {
+	Value      int32
+	Minimum    int32
+	Maximum    int32
+	Fuzz       int32
+	Flat       int32
+	Resolution int32
+}
+
+// https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h#L180
+
+func EVIOCSABS(abs AbsoluteAxis) uintptr {
+	return _IOW('E', uintptr(0xc0+abs), InputAbsInfo{})
+}

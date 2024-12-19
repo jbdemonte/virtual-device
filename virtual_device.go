@@ -28,6 +28,7 @@ type VirtualDevice interface {
 	WithRelAxes(relativeAxes []linux.RelativeAxis) VirtualDevice
 	WithRepeat(delay, period int32) VirtualDevice
 	WithLEDs(leds []linux.Led) VirtualDevice
+	WithProperties(properties []linux.InputProp) VirtualDevice
 
 	Register() error
 	Unregister() error
@@ -124,6 +125,11 @@ func (vd *virtualDevice) WithRepeat(delay, period int32) VirtualDevice {
 
 func (vd *virtualDevice) WithLEDs(leds []linux.Led) VirtualDevice {
 	vd.events.leds = leds
+	return vd
+}
+
+func (vd *virtualDevice) WithProperties(properties []linux.InputProp) VirtualDevice {
+	vd.events.properties = properties
 	return vd
 }
 
@@ -270,6 +276,33 @@ func (vd *virtualDevice) registerEvents() error {
 			if err != nil {
 				return fmt.Errorf("failed to set UI_SET_LEDBIT, 0x%x: %v", led, err)
 			}
+		}
+	}
+
+	if len(vd.events.properties) > 0 {
+		for _, prop := range vd.events.properties {
+			err := ioctl(vd.fd, linux.UI_SET_PROPBIT, uintptr(prop))
+			if err != nil {
+				return fmt.Errorf("failed to set UI_SET_PROPBIT, 0x%x: %v", prop, err)
+			}
+		}
+	}
+
+	for _, event := range vd.events.absoluteAxes {
+		if event.Resolution > 0 {
+			absInfo := linux.InputAbsInfo{
+				Value:      event.Value,
+				Minimum:    event.Min,
+				Maximum:    event.Max,
+				Fuzz:       event.Fuzz,
+				Flat:       event.Flat,
+				Resolution: event.Resolution,
+			}
+			err := ioctl(vd.fd, linux.EVIOCSABS(event.Axis), uintptr(unsafe.Pointer(&absInfo)))
+			if err != nil {
+				return fmt.Errorf("failed to set EVIOCSABS(0x%x), InputAbsInfo: %v", event.Axis, err)
+			}
+
 		}
 	}
 

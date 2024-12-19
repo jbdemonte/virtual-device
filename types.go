@@ -7,12 +7,13 @@ import (
 )
 
 type AbsAxis struct {
-	Axis  linux.AbsoluteAxis
-	Value int32
-	Min   int32
-	Max   int32
-	Flat  int32
-	Fuzz  int32
+	Axis       linux.AbsoluteAxis
+	Value      int32
+	Min        int32
+	Max        int32
+	Flat       int32
+	Fuzz       int32
+	Resolution int32
 }
 
 type Repeat struct {
@@ -38,6 +39,7 @@ type Events struct {
 	scanCode     bool
 	repeat       *Repeat
 	leds         []linux.Led
+	properties   []linux.InputProp
 }
 
 type virtualDevice struct {

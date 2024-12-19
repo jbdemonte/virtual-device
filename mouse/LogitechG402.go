@@ -11,10 +11,10 @@ func NewLogitechG402() VirtualMouse {
 		WithDevice(
 			virtual_device.NewVirtualDevice().
 				WithBusType(linux.BUS_USB).
-				WithProduct(0xc07e).
 				WithVendor(sdl.USB_VENDOR_LOGITECH).
+				WithProduct(0xc07e).
 				WithVersion(0x111).
-				WithName("Logitech Gaming Mouse G402 ****").
+				WithName("Logitech Gaming Mouse G402").
 				WithButtons([]linux.Button{
 					linux.BTN_LEFT,
 					linux.BTN_RIGHT,

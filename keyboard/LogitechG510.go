@@ -11,8 +11,8 @@ func NewLogitechG510() VirtualKeyboard {
 		WithDevice(
 			virtual_device.NewVirtualDevice().
 				WithBusType(linux.BUS_USB).
-				WithProduct(0xc22d).
 				WithVendor(sdl.USB_VENDOR_LOGITECH).
+				WithProduct(0xc22d).
 				WithVersion(0x111).
 				WithName("Logitech G510 Gaming Keyboard"),
 		).
