@@ -6,11 +6,13 @@ import (
 	"time"
 )
 
+// https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
+
 type TouchSlot struct {
-	slot     int
-	x        float32
-	y        float32
-	pressure float32
+	Slot     int
+	X        float32
+	Y        float32
+	Pressure float32
 }
 
 type VirtualTouchpad interface {
@@ -40,6 +42,7 @@ type VirtualTouchpadFactory interface {
 	WithAxes(absoluteAxes []virtual_device.AbsAxis) VirtualTouchpadFactory
 	WithButtons(buttons []linux.Button) VirtualTouchpadFactory
 	WithProperties(properties []linux.InputProp) VirtualTouchpadFactory
+	WithLegacyMultitouch() VirtualTouchpadFactory
 	Create() VirtualTouchpad
 }
 
@@ -57,7 +60,7 @@ type virtualTouchpadFactory struct {
 	axes             []virtual_device.AbsAxis
 	buttons          []linux.Button
 	properties       []linux.InputProp
-	protocolB        bool
+	protocolA        bool
 }
 
 func (f *virtualTouchpadFactory) WithDevice(device virtual_device.VirtualDevice) VirtualTouchpadFactory {
@@ -90,6 +93,11 @@ func (f *virtualTouchpadFactory) WithProperties(properties []linux.InputProp) Vi
 	return f
 }
 
+func (f *virtualTouchpadFactory) WithLegacyMultitouch() VirtualTouchpadFactory {
+	f.protocolA = true
+	return f
+}
+
 func (f *virtualTouchpadFactory) Create() VirtualTouchpad {
 	clickDelay := f.clickDelay
 	if clickDelay < 0 {
@@ -105,7 +113,7 @@ func (f *virtualTouchpadFactory) Create() VirtualTouchpad {
 	f.device.WithButtons(f.buttons)
 	f.device.WithProperties(f.properties)
 
-	axes := make(map[linux.AbsoluteAxis]virtual_device.AbsAxis)
+	axes := map[linux.AbsoluteAxis]virtual_device.AbsAxis{}
 
 	for _, axis := range f.axes {
 		axes[axis.Axis] = axis
@@ -116,6 +124,8 @@ func (f *virtualTouchpadFactory) Create() VirtualTouchpad {
 		clickDelay:       clickDelay,
 		doubleClickDelay: doubleClickDelay,
 		axes:             axes,
+		currentSlots:     map[int]bool{},
+		protocolA:        f.protocolA,
 	}
 }
 
@@ -126,6 +136,7 @@ type virtualTouchpad struct {
 	axes             map[linux.AbsoluteAxis]virtual_device.AbsAxis
 	currentSlots     map[int]bool
 	fingerCount      int
+	protocolA        bool
 }
 
 func (vt *virtualTouchpad) Register() error {
@@ -143,26 +154,73 @@ func (vt *virtualTouchpad) absDenormalized(axis linux.AbsoluteAxis, x float32) {
 	}
 }
 
-func (vt *virtualTouchpad) touch(slot int, x, y, pressure float32) TouchSlot {
-	vt.device.Abs(uint16(linux.ABS_MT_SLOT), int32(slot))
-	if pressure == 0 {
-		// release the slot
-		vt.currentSlots[slot] = false
-		vt.device.Abs(uint16(linux.ABS_MT_TRACKING_ID), int32(-1))
-		vt.fingerCount = vt.fingerCount - 1
-	} else if vt.currentSlots[slot] == false {
-		// lock the slot
-		vt.currentSlots[slot] = true
-		vt.device.Abs(uint16(linux.ABS_MT_TRACKING_ID), int32(slot))
-		vt.fingerCount = vt.fingerCount + 1
-	}
-	if pressure > 0 {
-		vt.absDenormalized(linux.ABS_X, x)
-		vt.absDenormalized(linux.ABS_Y, y)
-	}
+func (vt *virtualTouchpad) Touch(x, y, pressure float32) {
+	vt.absDenormalized(linux.ABS_X, x)
+	vt.absDenormalized(linux.ABS_Y, y)
 	vt.absDenormalized(linux.ABS_PRESSURE, pressure)
-	vt.device.Sync()
-	return TouchSlot{slot, x, y, pressure}
+	vt.device.SyncReport()
+}
+
+func (vt *virtualTouchpad) assignSlotIfNeeded(touchSlots []TouchSlot) []TouchSlot {
+	reserved := make(map[int]bool)
+	for _, ts := range touchSlots {
+		reserved[ts.Slot] = true
+	}
+	used := make(map[int]bool)
+	for i, _ := range touchSlots {
+		slot := touchSlots[i].Slot
+		if used[slot] {
+			for reserved[slot] || used[slot] {
+				slot = slot + 1
+			}
+		}
+		used[slot] = true
+		touchSlots[i].Slot = slot
+	}
+	return touchSlots
+}
+
+// https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
+func (vt *virtualTouchpad) multiTouchA(touchSlots []TouchSlot) []TouchSlot {
+	for _, ts := range touchSlots {
+		vt.absDenormalized(linux.ABS_MT_POSITION_X, ts.X)
+		vt.absDenormalized(linux.ABS_MT_POSITION_Y, ts.Y)
+		vt.device.Sync(linux.SYN_MT_REPORT)
+	}
+	if len(touchSlots) == 0 {
+		vt.device.Sync(linux.SYN_MT_REPORT)
+	}
+	vt.device.SyncReport()
+	return touchSlots
+}
+
+func (vt *virtualTouchpad) multiTouchB(touchSlots []TouchSlot) []TouchSlot {
+	watcher := vt.createFingerCountWatcher()
+	touchSlots = vt.assignSlotIfNeeded(touchSlots)
+
+	for _, ts := range touchSlots {
+		vt.device.Abs(uint16(linux.ABS_MT_SLOT), int32(ts.Slot))
+		if ts.Pressure == 0 {
+			// release the Slot
+			vt.currentSlots[ts.Slot] = false
+			vt.device.Abs(uint16(linux.ABS_MT_TRACKING_ID), int32(-1))
+			vt.fingerCount = vt.fingerCount - 1
+		} else if vt.currentSlots[ts.Slot] == false {
+			// lock the Slot
+			vt.currentSlots[ts.Slot] = true
+			vt.device.Abs(uint16(linux.ABS_MT_TRACKING_ID), int32(ts.Slot))
+			vt.fingerCount = vt.fingerCount + 1
+		}
+		if ts.Pressure > 0 {
+			vt.absDenormalized(linux.ABS_MT_POSITION_X, ts.X)
+			vt.absDenormalized(linux.ABS_MT_POSITION_Y, ts.Y)
+		}
+		vt.absDenormalized(linux.ABS_PRESSURE, ts.Pressure)
+	}
+
+	watcher()
+	vt.device.SyncReport()
+	return touchSlots
 }
 
 func (vt *virtualTouchpad) toggleFingerCount(count int, value bool) {
@@ -180,7 +238,6 @@ func (vt *virtualTouchpad) toggleFingerCount(count int, value bool) {
 	} else {
 		vt.device.KeyRelease(uint16(button))
 	}
-	vt.device.Sync()
 }
 
 func (vt *virtualTouchpad) createFingerCountWatcher() func() {
@@ -193,51 +250,21 @@ func (vt *virtualTouchpad) createFingerCountWatcher() func() {
 	}
 }
 
-func (vt *virtualTouchpad) Touch(x, y, pressure float32) {
-	watcher := vt.createFingerCountWatcher()
-	vt.touch(0, x, y, pressure)
-	watcher()
-}
-
-func (vt *virtualTouchpad) assignSlotIfNeeded(touchSlots []TouchSlot) []TouchSlot {
-	// auto-assign slots if needed ( default slot #0, pressure  > 0, slot already used)
-	reserved := make(map[int]bool)
-	for _, ts := range touchSlots {
-		reserved[ts.slot] = true
-	}
-	for i, _ := range touchSlots {
-		slot := touchSlots[i].slot
-		pressure := touchSlots[i].pressure
-		if slot == 0 && vt.currentSlots[slot] == true && pressure > 0 {
-			for vt.currentSlots[slot] && !reserved[slot] {
-				slot = slot + 1
-			}
-			reserved[slot] = true
-			touchSlots[i].slot = slot
-		}
-	}
-	return touchSlots
-}
-
 func (vt *virtualTouchpad) MultiTouch(touchSlots []TouchSlot) []TouchSlot {
-	watcher := vt.createFingerCountWatcher()
-	touchSlots = vt.assignSlotIfNeeded(touchSlots)
-	result := make([]TouchSlot, 0)
-	for _, ts := range touchSlots {
-		result = append(result, vt.touch(ts.slot, ts.x, ts.y, ts.pressure))
+	if vt.protocolA {
+		return vt.multiTouchA(touchSlots)
 	}
-	watcher()
-	return result
+	return vt.multiTouchB(touchSlots)
 }
 
 func (vt *virtualTouchpad) ButtonPress(button linux.Button) {
 	vt.device.KeyPress(uint16(button))
-	vt.device.Sync()
+	vt.device.SyncReport()
 }
 
 func (vt *virtualTouchpad) ButtonRelease(button linux.Button) {
 	vt.device.KeyRelease(uint16(button))
-	vt.device.Sync()
+	vt.device.SyncReport()
 }
 
 func (vt *virtualTouchpad) Click(btn linux.Button) {

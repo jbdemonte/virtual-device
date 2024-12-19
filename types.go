@@ -7,13 +7,15 @@ import (
 )
 
 type AbsAxis struct {
-	Axis       linux.AbsoluteAxis
-	Value      int32
-	Min        int32
-	Max        int32
-	Flat       int32
-	Fuzz       int32
-	Resolution int32
+	Axis             linux.AbsoluteAxis
+	Value            int32
+	Min              int32
+	Max              int32
+	Flat             int32
+	Fuzz             int32
+	Resolution       int32
+	IsUnidirectional bool
+	IsDenormalized   bool
 }
 
 type Repeat struct {
@@ -27,8 +29,11 @@ func (a AbsAxis) Denormalize(value float32) int32 {
 	} else if value > 1 {
 		value = 1
 	}
-	result := float32(a.Min) + (value+1)*float32(a.Max-a.Min)/2
-	return int32(result)
+	if a.IsUnidirectional {
+		return int32(float32(a.Min) + (value)*float32(a.Max-a.Min))
+	}
+
+	return int32(float32(a.Min) + (value+1)*float32(a.Max-a.Min)/2)
 }
 
 type Events struct {

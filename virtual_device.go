@@ -35,7 +35,8 @@ type VirtualDevice interface {
 	Unregister() error
 
 	Send(evType, code uint16, value int32)
-	Sync()
+	Sync(evType linux.SyncEvent)
+	SyncReport()
 	KeyPress(key uint16)
 	KeyRelease(key uint16)
 	Abs(absCode uint16, value int32)
@@ -379,7 +380,7 @@ func (vd *virtualDevice) pull() {
 	if vd.events.repeat != nil {
 		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_DELAY), vd.events.repeat.delay)
 		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_PERIOD), vd.events.repeat.period)
-		vd.Sync()
+		vd.SyncReport()
 	}
 }
 
@@ -455,8 +456,12 @@ func (vd *virtualDevice) Send(evType, code uint16, value int32) {
 	}
 }
 
-func (vd *virtualDevice) Sync() {
-	vd.Send(uint16(linux.EV_SYN), uint16(linux.SYN_REPORT), 0)
+func (vd *virtualDevice) Sync(evType linux.SyncEvent) {
+	vd.Send(uint16(linux.EV_SYN), uint16(evType), 0)
+}
+
+func (vd *virtualDevice) SyncReport() {
+	vd.Sync(linux.SYN_REPORT)
 }
 
 func (vd *virtualDevice) KeyPress(key uint16) {

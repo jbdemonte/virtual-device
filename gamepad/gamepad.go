@@ -160,7 +160,7 @@ func (vg *virtualGamepad) Press(button Button) {
 			fmt.Println("Unknown event type")
 		}
 	}
-	vg.device.Sync()
+	vg.device.SyncReport()
 }
 
 func (vg *virtualGamepad) Release(button Button) {
@@ -184,19 +184,19 @@ func (vg *virtualGamepad) Release(button Button) {
 			fmt.Println("Unknown event type")
 		}
 	}
-	vg.device.Sync()
+	vg.device.SyncReport()
 }
 
 func (vg *virtualGamepad) moveStick(stick *MappingStick, x, y float32) {
 	vg.device.Abs(uint16(stick.X.Axis), stick.X.Denormalize(x))
 	vg.device.Abs(uint16(stick.Y.Axis), stick.Y.Denormalize(y))
-	vg.device.Sync()
+	vg.device.SyncReport()
 
 }
 
 func (vg *virtualGamepad) moveAxis(absAxis *virtual_device.AbsAxis, p float32) {
 	vg.device.Abs(uint16(absAxis.Axis), absAxis.Denormalize(p))
-	vg.device.Sync()
+	vg.device.SyncReport()
 }
 
 func (vg *virtualGamepad) MoveLeftStick(x, y float32) {
