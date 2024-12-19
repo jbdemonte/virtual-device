@@ -7,6 +7,7 @@ import (
 	"github.com/jbdemonte/virtual-device/sdl"
 	"github.com/jbdemonte/virtual-device/utils"
 	"os"
+	"strings"
 	"syscall"
 	"time"
 	"unsafe"
@@ -160,6 +161,31 @@ func (vd *virtualDevice) Register() error {
 	return nil
 }
 
+func (vd *virtualDevice) fetchEventPath() (string, error) {
+	sysInputDir := "/sys/devices/virtual/input/"
+	path := make([]byte, 65) // 64 bytes + null byte
+
+	err := ioctl(vd.fd, linux.UI_GET_SYSNAME(64), uintptr(unsafe.Pointer(&path[0])))
+	if err != nil {
+		return "", fmt.Errorf("ioctl uiGetSysname failed: %v", err)
+	}
+
+	sysPath := sysInputDir + strings.TrimRight(string(path), "\x00")
+
+	files, err := os.ReadDir(sysPath)
+	if err != nil {
+		return "", fmt.Errorf("unable to read directory %s: %v", sysPath, err)
+	}
+
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), "event") {
+			return fmt.Sprintf("/dev/input/%s", file.Name()), nil
+		}
+	}
+
+	return "", fmt.Errorf("no event file found in %s", sysPath)
+}
+
 func (vd *virtualDevice) createDevice() (err error) {
 	var fixedSizeName [linux.UINPUT_MAX_NAME_SIZE]byte
 	copy(fixedSizeName[:], vd.name)
@@ -171,11 +197,16 @@ func (vd *virtualDevice) createDevice() (err error) {
 	copy(uinputDev.Name[:], fixedSizeName[:])
 	uinputDev.ID = vd.id
 
+	setAbsResolution := false
+
 	for _, event := range vd.events.absoluteAxes {
 		uinputDev.AbsMin[event.Axis] = event.Min
 		uinputDev.AbsMax[event.Axis] = event.Max
 		uinputDev.AbsFlat[event.Axis] = event.Flat
 		uinputDev.AbsFuzz[event.Axis] = event.Fuzz
+		if event.Resolution > 0 {
+			setAbsResolution = true
+		}
 	}
 
 	_, err = vd.fd.Write((*[unsafe.Sizeof(uinputDev)]byte)(unsafe.Pointer(&uinputDev))[:])
@@ -188,8 +219,50 @@ func (vd *virtualDevice) createDevice() (err error) {
 		return fmt.Errorf("failed to create device: %v", err)
 	}
 
-	time.Sleep(time.Millisecond * 200)
+	vd.eventPath, err = vd.fetchEventPath()
+	if err != nil {
+		return fmt.Errorf("fetchEventPath: %v", err)
+	}
 
+	err = utils.WaitForEventFile(vd.eventPath, 500*time.Millisecond)
+	if err != nil {
+		return fmt.Errorf("WaitForEventFile: %v", err)
+	}
+
+	if setAbsResolution {
+		err = vd.setAbsResolution()
+		if err != nil {
+			return fmt.Errorf("setAbsResolution: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func (vd *virtualDevice) setAbsResolution() error {
+	eventFile, err := os.Open(vd.eventPath)
+	if err != nil {
+		return fmt.Errorf("failed to open event file %s: %v", vd.eventPath, err)
+	}
+	defer eventFile.Close()
+
+	for _, event := range vd.events.absoluteAxes {
+		if event.Resolution > 0 {
+			absInfo := linux.InputAbsInfo{
+				Value:      event.Value,
+				Minimum:    event.Min,
+				Maximum:    event.Max,
+				Fuzz:       event.Fuzz,
+				Flat:       event.Flat,
+				Resolution: event.Resolution,
+			}
+
+			err = ioctl(eventFile, linux.EVIOCSABS(event.Axis), uintptr(unsafe.Pointer(&absInfo)))
+			if err != nil {
+				return fmt.Errorf("failed to set EVIOCSABS(0x%x), InputAbsInfo: %v", event.Axis, err)
+			}
+		}
+	}
 	return nil
 }
 
@@ -285,24 +358,6 @@ func (vd *virtualDevice) registerEvents() error {
 			if err != nil {
 				return fmt.Errorf("failed to set UI_SET_PROPBIT, 0x%x: %v", prop, err)
 			}
-		}
-	}
-
-	for _, event := range vd.events.absoluteAxes {
-		if event.Resolution > 0 {
-			absInfo := linux.InputAbsInfo{
-				Value:      event.Value,
-				Minimum:    event.Min,
-				Maximum:    event.Max,
-				Fuzz:       event.Fuzz,
-				Flat:       event.Flat,
-				Resolution: event.Resolution,
-			}
-			err := ioctl(vd.fd, linux.EVIOCSABS(event.Axis), uintptr(unsafe.Pointer(&absInfo)))
-			if err != nil {
-				return fmt.Errorf("failed to set EVIOCSABS(0x%x), InputAbsInfo: %v", event.Axis, err)
-			}
-
 		}
 	}
 

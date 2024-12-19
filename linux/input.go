@@ -66,8 +66,12 @@ type InputAbsInfo struct {
 	Resolution int32
 }
 
-// https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h#L180
+// https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h#L179
+func EVIOCGABS(abs AbsoluteAxis) uintptr {
+	return _IOR('E', uintptr(0x40+abs), InputAbsInfo{}) /* get abs value/limits */
+}
 
+// https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h#L180
 func EVIOCSABS(abs AbsoluteAxis) uintptr {
-	return _IOW('E', uintptr(0xc0+abs), InputAbsInfo{})
+	return _IOW('E', uintptr(0xc0+abs), InputAbsInfo{}) /* set abs value/limits */
 }

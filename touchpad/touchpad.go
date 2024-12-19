@@ -38,6 +38,8 @@ type VirtualTouchpadFactory interface {
 	WithClickDelay(delay int) VirtualTouchpadFactory
 	WithDoubleClickDelay(delay int) VirtualTouchpadFactory
 	WithAxes(absoluteAxes []virtual_device.AbsAxis) VirtualTouchpadFactory
+	WithButtons(buttons []linux.Button) VirtualTouchpadFactory
+	WithProperties(properties []linux.InputProp) VirtualTouchpadFactory
 	Create() VirtualTouchpad
 }
 
@@ -53,6 +55,8 @@ type virtualTouchpadFactory struct {
 	clickDelay       int
 	doubleClickDelay int
 	axes             []virtual_device.AbsAxis
+	buttons          []linux.Button
+	properties       []linux.InputProp
 	protocolB        bool
 }
 
@@ -76,6 +80,16 @@ func (f *virtualTouchpadFactory) WithAxes(axes []virtual_device.AbsAxis) Virtual
 	return f
 }
 
+func (f *virtualTouchpadFactory) WithButtons(buttons []linux.Button) VirtualTouchpadFactory {
+	f.buttons = buttons
+	return f
+}
+
+func (f *virtualTouchpadFactory) WithProperties(properties []linux.InputProp) VirtualTouchpadFactory {
+	f.properties = properties
+	return f
+}
+
 func (f *virtualTouchpadFactory) Create() VirtualTouchpad {
 	clickDelay := f.clickDelay
 	if clickDelay < 0 {
@@ -88,6 +102,8 @@ func (f *virtualTouchpadFactory) Create() VirtualTouchpad {
 	}
 
 	f.device.WithAbsAxes(f.axes)
+	f.device.WithButtons(f.buttons)
+	f.device.WithProperties(f.properties)
 
 	axes := make(map[linux.AbsoluteAxis]virtual_device.AbsAxis)
 

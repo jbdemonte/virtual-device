@@ -1,6 +1,6 @@
 package linux
 
-import "unsafe"
+import "reflect"
 
 // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/ioctl.h
 
@@ -23,14 +23,14 @@ const (
 )
 
 func _IOC(dir, typ, nr, size uintptr) uintptr {
-	return ((dir << _IOC_DIRSHIFT) |
+	return (dir << _IOC_DIRSHIFT) |
 		(typ << _IOC_TYPESHIFT) |
 		(nr << _IOC_NRSHIFT) |
-		(size << _IOC_SIZESHIFT))
+		(size << _IOC_SIZESHIFT)
 }
 
 func _IOC_TYPECHECK(t interface{}) uintptr {
-	return uintptr(unsafe.Sizeof(t))
+	return uintptr(reflect.TypeOf(t).Size())
 }
 
 func _IO(typ byte, nr uintptr) uintptr {

@@ -45,6 +45,7 @@ type Events struct {
 type virtualDevice struct {
 	fd           *os.File
 	path         string
+	eventPath    string
 	mode         os.FileMode
 	queueLen     int
 	name         string
