@@ -6,16 +6,16 @@ import (
 	"github.com/jbdemonte/virtual-device/sdl"
 )
 
-func NewXBox360() VirtualGamepad {
+func NewXBoxOneS() VirtualGamepad {
 	return NewVirtualGamepadFactory().
 		WithDevice(
 			virtual_device.
 				NewVirtualDevice().
 				WithBusType(linux.BUS_USB).
 				WithVendor(sdl.USB_VENDOR_MICROSOFT).
-				WithProduct(sdl.USB_PRODUCT_XBOX360_XUSB_CONTROLLER).
-				WithVersion(0x107).
-				WithName("Xbox 360 Wireless Receiver (XBOX)"),
+				WithProduct(sdl.USB_PRODUCT_XBOX_ONE_S).
+				WithVersion(0x408).
+				WithName("Microsoft X-Box One S pad"),
 		).
 		WithDigital(
 			MappingDigital{
@@ -28,16 +28,16 @@ func NewXBox360() VirtualGamepad {
 				ButtonStart:  linux.BTN_START,
 				ButtonMode:   linux.BTN_MODE, // button XBox
 
-				ButtonUp:    []InputEvent{linux.BTN_TRIGGER_HAPPY3, HatEvent{Axis: linux.ABS_HAT0Y, Value: -1}},
-				ButtonDown:  []InputEvent{linux.BTN_TRIGGER_HAPPY4, HatEvent{Axis: linux.ABS_HAT0Y, Value: 1}},
-				ButtonLeft:  []InputEvent{linux.BTN_TRIGGER_HAPPY1, HatEvent{Axis: linux.ABS_HAT0X, Value: -1}},
-				ButtonRight: []InputEvent{linux.BTN_TRIGGER_HAPPY2, HatEvent{Axis: linux.ABS_HAT0X, Value: 1}},
+				ButtonUp:    HatEvent{Axis: linux.ABS_HAT0Y, Value: -1},
+				ButtonDown:  HatEvent{Axis: linux.ABS_HAT0Y, Value: 1},
+				ButtonLeft:  HatEvent{Axis: linux.ABS_HAT0X, Value: -1},
+				ButtonRight: HatEvent{Axis: linux.ABS_HAT0X, Value: 1},
 
 				ButtonL1: linux.BTN_TL,
 				ButtonR1: linux.BTN_TR,
 
-				ButtonL2: virtual_device.AbsAxis{Axis: linux.ABS_Z, Min: 0, Value: 0, Max: 255},
-				ButtonR2: virtual_device.AbsAxis{Axis: linux.ABS_RZ, Min: 0, Value: 0, Max: 255},
+				ButtonL2: virtual_device.AbsAxis{Axis: linux.ABS_Z, Min: 0, Value: 0, Max: 1023},
+				ButtonR2: virtual_device.AbsAxis{Axis: linux.ABS_RZ, Min: 0, Value: 0, Max: 1023},
 
 				ButtonL3: linux.BTN_THUMBL,
 				ButtonR3: linux.BTN_THUMBR,
