@@ -94,23 +94,31 @@ func (vg *virtualGamepad) init() {
 	absoluteAxes := make([]virtual_device.AbsAxis, 0)
 	hatEvents := make([]HatEvent, 0)
 
-	for _, events := range vg.digital {
-		for _, event := range events {
-			switch e := event.(type) {
-			case linux.Button:
-				buttons = append(buttons, e)
-			case linux.Key:
-				keys = append(keys, e)
-			case MSCScanCode:
-				vg.device.WithScanCode()
-			case HatEvent:
-				hatEvents = append(hatEvents, e)
-			case virtual_device.AbsAxis:
-				absoluteAxes = append(absoluteAxes, e)
-			default:
-				fmt.Println("Unknown event type")
+	var init func(event InputEvent)
+
+	init = func(event InputEvent) {
+		switch e := event.(type) {
+		case []InputEvent:
+			for _, item := range e {
+				init(item)
 			}
+		case linux.Button:
+			buttons = append(buttons, e)
+		case linux.Key:
+			keys = append(keys, e)
+		case MSCScanCode:
+			vg.device.WithScanCode()
+		case HatEvent:
+			hatEvents = append(hatEvents, e)
+		case virtual_device.AbsAxis:
+			absoluteAxes = append(absoluteAxes, e)
+		default:
+			fmt.Println("Unknown event type")
 		}
+	}
+
+	for _, event := range vg.digital {
+		init(event)
 	}
 
 	if vg.leftStick != nil {
@@ -135,17 +143,18 @@ func (vg *virtualGamepad) init() {
 
 	vg.device.WithButtons(buttons)
 	vg.device.WithKeys(keys)
-	vg.device.WithScanCode()
 	vg.device.WithAbsAxes(absoluteAxes)
 }
 
 func (vg *virtualGamepad) Press(button Button) {
-	events, exist := vg.digital[button]
-	if !exist {
-		fmt.Printf("button not assigned (0x%x)\n", button)
-	}
-	for _, event := range events {
+	var press func(event InputEvent)
+
+	press = func(event InputEvent) {
 		switch e := event.(type) {
+		case []InputEvent:
+			for _, item := range e {
+				press(item)
+			}
 		case linux.Button:
 			vg.device.KeyPress(uint16(e))
 		case linux.Key:
@@ -160,16 +169,25 @@ func (vg *virtualGamepad) Press(button Button) {
 			fmt.Println("Unknown event type")
 		}
 	}
+
+	event, exist := vg.digital[button]
+	if !exist {
+		fmt.Printf("button not assigned (0x%x)\n", button)
+	}
+
+	press(event)
 	vg.device.SyncReport()
 }
 
 func (vg *virtualGamepad) Release(button Button) {
-	events, exist := vg.digital[button]
-	if !exist {
-		fmt.Printf("button not assigned (0x%x)\n", button)
-	}
-	for _, event := range events {
+	var release func(event InputEvent)
+
+	release = func(event InputEvent) {
 		switch e := event.(type) {
+		case []InputEvent:
+			for _, item := range e {
+				release(item)
+			}
 		case linux.Button:
 			vg.device.KeyRelease(uint16(e))
 		case linux.Key:
@@ -184,6 +202,13 @@ func (vg *virtualGamepad) Release(button Button) {
 			fmt.Println("Unknown event type")
 		}
 	}
+
+	event, exist := vg.digital[button]
+	if !exist {
+		fmt.Printf("button not assigned (0x%x)\n", button)
+	}
+
+	release(event)
 	vg.device.SyncReport()
 }
 

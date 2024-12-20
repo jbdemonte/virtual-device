@@ -5,7 +5,7 @@ import (
 	"github.com/jbdemonte/virtual-device/linux"
 )
 
-type MappingDigital map[Button][]InputEvent
+type MappingDigital map[Button]InputEvent // single or array
 
 type MappingStick struct {
 	X virtual_device.AbsAxis
