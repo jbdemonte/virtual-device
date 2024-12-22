@@ -36,7 +36,7 @@ func (a AbsAxis) Denormalize(value float32) int32 {
 	return int32(float32(a.Min) + (value+1)*float32(a.Max-a.Min)/2)
 }
 
-type Events struct {
+type Config struct {
 	keys         []linux.Key
 	buttons      []linux.Button
 	absoluteAxes []AbsAxis
@@ -55,7 +55,7 @@ type virtualDevice struct {
 	queueLen     int
 	name         string
 	id           linux.InputID
-	events       Events
+	config       Config
 	isRegistered *utils.AtomicBool
 	queue        chan *linux.InputEvent
 }

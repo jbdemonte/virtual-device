@@ -95,43 +95,43 @@ func (vd *virtualDevice) WithName(name string) VirtualDevice {
 }
 
 func (vd *virtualDevice) WithKeys(keys []linux.Key) VirtualDevice {
-	vd.events.keys = keys
+	vd.config.keys = keys
 	return vd
 }
 
 func (vd *virtualDevice) WithButtons(buttons []linux.Button) VirtualDevice {
-	vd.events.buttons = buttons
+	vd.config.buttons = buttons
 	return vd
 }
 
 func (vd *virtualDevice) WithScanCode() VirtualDevice {
-	vd.events.scanCode = true
+	vd.config.scanCode = true
 	return vd
 }
 
 func (vd *virtualDevice) WithAbsAxes(absoluteAxes []AbsAxis) VirtualDevice {
-	vd.events.absoluteAxes = absoluteAxes
+	vd.config.absoluteAxes = absoluteAxes
 	return vd
 }
 
 func (vd *virtualDevice) WithRelAxes(relativeAxes []linux.RelativeAxis) VirtualDevice {
-	vd.events.relativeAxes = relativeAxes
+	vd.config.relativeAxes = relativeAxes
 	return vd
 }
 
 func (vd *virtualDevice) WithRepeat(delay, period int32) VirtualDevice {
-	vd.events.repeat = &Repeat{delay, period}
+	vd.config.repeat = &Repeat{delay, period}
 	return vd
 
 }
 
 func (vd *virtualDevice) WithLEDs(leds []linux.Led) VirtualDevice {
-	vd.events.leds = leds
+	vd.config.leds = leds
 	return vd
 }
 
 func (vd *virtualDevice) WithProperties(properties []linux.InputProp) VirtualDevice {
-	vd.events.properties = properties
+	vd.config.properties = properties
 	return vd
 }
 
@@ -146,7 +146,27 @@ func (vd *virtualDevice) Register() error {
 
 	vd.fd = fd
 
-	err = vd.registerEvents()
+	err = vd.registerKeys()
+	if err != nil {
+		return vd.unregisterOnError(err)
+	}
+
+	err = vd.registerScanCode()
+	if err != nil {
+		return vd.unregisterOnError(err)
+	}
+
+	err = vd.registerAxes()
+	if err != nil {
+		return vd.unregisterOnError(err)
+	}
+
+	err = vd.registerProperties()
+	if err != nil {
+		return vd.unregisterOnError(err)
+	}
+
+	err = vd.registerLeds()
 	if err != nil {
 		return vd.unregisterOnError(err)
 	}
@@ -157,6 +177,7 @@ func (vd *virtualDevice) Register() error {
 	}
 
 	vd.pull()
+
 	vd.isRegistered.Set(true)
 
 	return nil
@@ -200,7 +221,7 @@ func (vd *virtualDevice) createDevice() (err error) {
 
 	setAbsResolution := false
 
-	for _, event := range vd.events.absoluteAxes {
+	for _, event := range vd.config.absoluteAxes {
 		uinputDev.AbsMin[event.Axis] = event.Min
 		uinputDev.AbsMax[event.Axis] = event.Max
 		uinputDev.AbsFlat[event.Axis] = event.Flat
@@ -247,7 +268,7 @@ func (vd *virtualDevice) setAbsResolution() error {
 	}
 	defer eventFile.Close()
 
-	for _, event := range vd.events.absoluteAxes {
+	for _, event := range vd.config.absoluteAxes {
 		if event.Resolution > 0 {
 			absInfo := linux.InputAbsInfo{
 				Value:      event.Value,
@@ -267,8 +288,8 @@ func (vd *virtualDevice) setAbsResolution() error {
 	return nil
 }
 
-func (vd *virtualDevice) registerEvents() error {
-	if (vd.events.keys == nil || len(vd.events.keys) == 0) && (vd.events.buttons == nil || len(vd.events.buttons) == 0) {
+func (vd *virtualDevice) registerKeys() error {
+	if (vd.config.keys == nil || len(vd.config.keys) == 0) && (vd.config.buttons == nil || len(vd.config.buttons) == 0) {
 		return nil
 	}
 
@@ -277,8 +298,8 @@ func (vd *virtualDevice) registerEvents() error {
 		return fmt.Errorf("failed to set UI_SET_EVBIT, EV_KEY: %v", err)
 	}
 
-	if vd.events.keys != nil {
-		for _, key := range vd.events.keys {
+	if vd.config.keys != nil {
+		for _, key := range vd.config.keys {
 			err = ioctl(vd.fd, linux.UI_SET_KEYBIT, uintptr(key))
 			if err != nil {
 				return fmt.Errorf("failed to register key 0x%x: %v", key, err)
@@ -286,8 +307,8 @@ func (vd *virtualDevice) registerEvents() error {
 		}
 	}
 
-	if vd.events.buttons != nil {
-		for _, button := range vd.events.buttons {
+	if vd.config.buttons != nil {
+		for _, button := range vd.config.buttons {
 			err = ioctl(vd.fd, linux.UI_SET_KEYBIT, uintptr(button))
 			if err != nil {
 				return fmt.Errorf("failed to register button 0x%x: %v", button, err)
@@ -295,24 +316,39 @@ func (vd *virtualDevice) registerEvents() error {
 		}
 	}
 
-	if vd.events.scanCode {
-		err = ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_MSC))
+	if vd.config.repeat != nil {
+		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_REP))
 		if err != nil {
-			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_MSC: %v", err)
-		}
-
-		err = ioctl(vd.fd, linux.UI_SET_MSCBIT, uintptr(linux.MSC_SCAN))
-		if err != nil {
-			return fmt.Errorf("failed to register MSC_SCAN: %v", err)
+			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_REP: %v", err)
 		}
 	}
 
-	if vd.events.absoluteAxes != nil {
+	return nil
+}
+
+func (vd *virtualDevice) registerScanCode() error {
+	if !vd.config.scanCode {
+		return nil
+	}
+	err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_MSC))
+	if err != nil {
+		return fmt.Errorf("failed to set UI_SET_EVBIT, EV_MSC: %v", err)
+	}
+
+	err = ioctl(vd.fd, linux.UI_SET_MSCBIT, uintptr(linux.MSC_SCAN))
+	if err != nil {
+		return fmt.Errorf("failed to register MSC_SCAN: %v", err)
+	}
+	return nil
+}
+
+func (vd *virtualDevice) registerAxes() error {
+	if vd.config.absoluteAxes != nil {
 		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_ABS))
 		if err != nil {
 			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_ABS: %v", err)
 		}
-		for _, event := range vd.events.absoluteAxes {
+		for _, event := range vd.config.absoluteAxes {
 			err = ioctl(vd.fd, linux.UI_SET_ABSBIT, uintptr(event.Axis))
 			if err != nil {
 				return fmt.Errorf("failed to register absolute axe 0x%x: %v", event.Axis, err)
@@ -320,48 +356,48 @@ func (vd *virtualDevice) registerEvents() error {
 		}
 	}
 
-	if vd.events.relativeAxes != nil {
+	if vd.config.relativeAxes != nil {
 		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_REL))
 		if err != nil {
 			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_REL: %v", err)
 		}
-		for _, axis := range vd.events.relativeAxes {
+		for _, axis := range vd.config.relativeAxes {
 			err = ioctl(vd.fd, linux.UI_SET_RELBIT, uintptr(axis))
 			if err != nil {
 				return fmt.Errorf("failed to register relative axe 0x%x: %v", axis, err)
 			}
 		}
 	}
+	return nil
+}
 
-	if vd.events.repeat != nil {
-		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_REP))
+func (vd *virtualDevice) registerProperties() error {
+	if len(vd.config.properties) == 0 {
+		return nil
+	}
+	for _, prop := range vd.config.properties {
+		err := ioctl(vd.fd, linux.UI_SET_PROPBIT, uintptr(prop))
 		if err != nil {
-			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_REP: %v", err)
+			return fmt.Errorf("failed to set UI_SET_PROPBIT, 0x%x: %v", prop, err)
 		}
 	}
+	return nil
+}
 
-	if len(vd.events.leds) > 0 {
-		err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_LED))
+func (vd *virtualDevice) registerLeds() error {
+	if len(vd.config.leds) == 0 {
+		return nil
+	}
+	err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_LED))
+	if err != nil {
+		return fmt.Errorf("failed to set UI_SET_EVBIT, EV_LED: %v", err)
+	}
+	for _, led := range vd.config.leds {
+		err := ioctl(vd.fd, linux.UI_SET_LEDBIT, uintptr(led))
 		if err != nil {
-			return fmt.Errorf("failed to set UI_SET_EVBIT, EV_LED: %v", err)
-		}
-		for _, led := range vd.events.leds {
-			err := ioctl(vd.fd, linux.UI_SET_LEDBIT, uintptr(led))
-			if err != nil {
-				return fmt.Errorf("failed to set UI_SET_LEDBIT, 0x%x: %v", led, err)
-			}
+			return fmt.Errorf("failed to set UI_SET_LEDBIT, 0x%x: %v", led, err)
 		}
 	}
-
-	if len(vd.events.properties) > 0 {
-		for _, prop := range vd.events.properties {
-			err := ioctl(vd.fd, linux.UI_SET_PROPBIT, uintptr(prop))
-			if err != nil {
-				return fmt.Errorf("failed to set UI_SET_PROPBIT, 0x%x: %v", prop, err)
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -377,9 +413,9 @@ func (vd *virtualDevice) pull() {
 		}
 	}()
 
-	if vd.events.repeat != nil {
-		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_DELAY), vd.events.repeat.delay)
-		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_PERIOD), vd.events.repeat.period)
+	if vd.config.repeat != nil {
+		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_DELAY), vd.config.repeat.delay)
+		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_PERIOD), vd.config.repeat.period)
 		vd.SyncReport()
 	}
 }
