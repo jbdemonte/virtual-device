@@ -122,44 +122,44 @@ func (vm *virtualMouse) Unregister() error {
 }
 
 func (vm *virtualMouse) Move(deltaX, deltaY int32) {
-	vm.device.Rel(uint16(linux.REL_X), deltaX)
-	vm.device.Rel(uint16(linux.REL_Y), deltaY)
+	vm.device.SendRelativeEvent(linux.REL_X, deltaX)
+	vm.device.SendRelativeEvent(linux.REL_Y, deltaY)
 	vm.device.SyncReport()
 }
 
 func (vm *virtualMouse) MoveX(deltaX int32) {
-	vm.device.Rel(uint16(linux.REL_X), deltaX)
+	vm.device.SendRelativeEvent(linux.REL_X, deltaX)
 	vm.device.SyncReport()
 }
 
 func (vm *virtualMouse) MoveY(deltaY int32) {
-	vm.device.Rel(uint16(linux.REL_Y), deltaY)
+	vm.device.SendRelativeEvent(linux.REL_Y, deltaY)
 	vm.device.SyncReport()
 }
 
 func (vm *virtualMouse) ScrollVertical(delta int32) {
-	vm.device.Rel(uint16(linux.REL_WHEEL), delta)
+	vm.device.SendRelativeEvent(linux.REL_WHEEL, delta)
 	if vm.highResStepVertical != 0 {
-		vm.device.Rel(uint16(linux.REL_WHEEL_HI_RES), delta*vm.highResStepVertical)
+		vm.device.SendRelativeEvent(linux.REL_WHEEL_HI_RES, delta*vm.highResStepVertical)
 	}
 	vm.device.SyncReport()
 }
 
 func (vm *virtualMouse) ScrollHorizontal(delta int32) {
-	vm.device.Rel(uint16(linux.REL_HWHEEL), delta)
+	vm.device.SendRelativeEvent(linux.REL_HWHEEL, delta)
 	if vm.highResStepHorizontal != 0 {
-		vm.device.Rel(uint16(linux.REL_HWHEEL_HI_RES), delta*vm.highResStepHorizontal)
+		vm.device.SendRelativeEvent(linux.REL_HWHEEL_HI_RES, delta*vm.highResStepHorizontal)
 	}
 	vm.device.SyncReport()
 }
 
 func (vm *virtualMouse) ButtonPress(button linux.Button) {
-	vm.device.KeyPress(uint16(button))
+	vm.device.PressButton(button)
 	vm.device.SyncReport()
 }
 
 func (vm *virtualMouse) ButtonRelease(button linux.Button) {
-	vm.device.KeyRelease(uint16(button))
+	vm.device.ReleaseButton(button)
 	vm.device.SyncReport()
 }
 

@@ -37,12 +37,14 @@ type VirtualDevice interface {
 	Send(evType, code uint16, value int32)
 	Sync(evType linux.SyncEvent)
 	SyncReport()
-	KeyPress(key uint16)
-	KeyRelease(key uint16)
-	Abs(absCode uint16, value int32)
-	Rel(relCode uint16, value int32)
-	ScanCode(value int32)
-	Led(led linux.Led, state bool)
+	PressKey(key linux.Key)
+	ReleaseKey(key linux.Key)
+	PressButton(key linux.Button)
+	ReleaseButton(key linux.Button)
+	SendAbsoluteEvent(axis linux.AbsoluteAxis, value int32)
+	SendRelativeEvent(axis linux.RelativeAxis, value int32)
+	SendScanCode(value int32)
+	SetLed(led linux.Led, state bool)
 }
 
 func NewVirtualDevice() VirtualDevice {
@@ -500,27 +502,35 @@ func (vd *virtualDevice) SyncReport() {
 	vd.Sync(linux.SYN_REPORT)
 }
 
-func (vd *virtualDevice) KeyPress(key uint16) {
-	vd.Send(uint16(linux.EV_KEY), key, 1)
+func (vd *virtualDevice) PressKey(key linux.Key) {
+	vd.Send(uint16(linux.EV_KEY), uint16(key), 1)
 }
 
-func (vd *virtualDevice) KeyRelease(key uint16) {
-	vd.Send(uint16(linux.EV_KEY), key, 0)
+func (vd *virtualDevice) ReleaseKey(key linux.Key) {
+	vd.Send(uint16(linux.EV_KEY), uint16(key), 0)
 }
 
-func (vd *virtualDevice) Abs(absCode uint16, value int32) {
-	vd.Send(uint16(linux.EV_ABS), absCode, value)
+func (vd *virtualDevice) PressButton(button linux.Button) {
+	vd.Send(uint16(linux.EV_KEY), uint16(button), 1)
 }
 
-func (vd *virtualDevice) Rel(relCode uint16, value int32) {
-	vd.Send(uint16(linux.EV_REL), relCode, value)
+func (vd *virtualDevice) ReleaseButton(button linux.Button) {
+	vd.Send(uint16(linux.EV_KEY), uint16(button), 0)
 }
 
-func (vd *virtualDevice) ScanCode(value int32) {
+func (vd *virtualDevice) SendAbsoluteEvent(axis linux.AbsoluteAxis, value int32) {
+	vd.Send(uint16(linux.EV_ABS), uint16(axis), value)
+}
+
+func (vd *virtualDevice) SendRelativeEvent(axis linux.RelativeAxis, value int32) {
+	vd.Send(uint16(linux.EV_REL), uint16(axis), value)
+}
+
+func (vd *virtualDevice) SendScanCode(value int32) {
 	vd.Send(uint16(linux.EV_MSC), uint16(linux.MSC_SCAN), value)
 }
 
-func (vd *virtualDevice) Led(led linux.Led, state bool) {
+func (vd *virtualDevice) SetLed(led linux.Led, state bool) {
 	value := int32(0)
 	if state {
 		value = 1

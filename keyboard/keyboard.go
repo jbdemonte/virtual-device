@@ -9,9 +9,9 @@ type VirtualKeyboard interface {
 	Register() error
 	Unregister() error
 
-	KeyPress(key linux.Key)
-	KeyRelease(key linux.Key)
-	Led(led linux.Led, state bool)
+	PressKey(key linux.Key)
+	ReleaseKey(key linux.Key)
+	SetLed(led linux.Led, state bool)
 }
 
 type VirtualKeyboardFactory interface {
@@ -87,14 +87,14 @@ func (vk *virtualKeyboard) Unregister() error {
 	return vk.device.Unregister()
 }
 
-func (vk *virtualKeyboard) KeyPress(key linux.Key) {
-	vk.device.KeyPress(uint16(key))
+func (vk *virtualKeyboard) PressKey(key linux.Key) {
+	vk.device.PressKey(key)
 }
 
-func (vk *virtualKeyboard) KeyRelease(key linux.Key) {
-	vk.device.KeyRelease(uint16(key))
+func (vk *virtualKeyboard) ReleaseKey(key linux.Key) {
+	vk.device.ReleaseKey(key)
 }
 
-func (vk *virtualKeyboard) Led(led linux.Led, state bool) {
-	vk.device.Led(led, state)
+func (vk *virtualKeyboard) SetLed(led linux.Led, state bool) {
+	vk.device.SetLed(led, state)
 }

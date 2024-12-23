@@ -156,15 +156,15 @@ func (vg *virtualGamepad) Press(button Button) {
 				press(item)
 			}
 		case linux.Button:
-			vg.device.KeyPress(uint16(e))
+			vg.device.PressButton(e)
 		case linux.Key:
-			vg.device.KeyPress(uint16(e))
+			vg.device.PressKey(e)
 		case MSCScanCode:
-			vg.device.ScanCode(int32(e))
+			vg.device.SendScanCode(int32(e))
 		case HatEvent:
-			vg.device.Abs(uint16(e.Axis), e.Value)
+			vg.device.SendAbsoluteEvent(e.Axis, e.Value)
 		case virtual_device.AbsAxis:
-			vg.device.Abs(uint16(e.Axis), e.Max)
+			vg.device.SendAbsoluteEvent(e.Axis, e.Max)
 		default:
 			fmt.Println("Unknown event type")
 		}
@@ -189,15 +189,15 @@ func (vg *virtualGamepad) Release(button Button) {
 				release(item)
 			}
 		case linux.Button:
-			vg.device.KeyRelease(uint16(e))
+			vg.device.ReleaseButton(e)
 		case linux.Key:
-			vg.device.KeyRelease(uint16(e))
+			vg.device.ReleaseKey(e)
 		case MSCScanCode:
-			vg.device.ScanCode(int32(e))
+			vg.device.SendScanCode(int32(e))
 		case HatEvent:
-			vg.device.Abs(uint16(e.Axis), 0)
+			vg.device.SendAbsoluteEvent(e.Axis, 0)
 		case virtual_device.AbsAxis:
-			vg.device.Abs(uint16(e.Axis), e.Min)
+			vg.device.SendAbsoluteEvent(e.Axis, e.Min)
 		default:
 			fmt.Println("Unknown event type")
 		}
@@ -213,14 +213,14 @@ func (vg *virtualGamepad) Release(button Button) {
 }
 
 func (vg *virtualGamepad) moveStick(stick *MappingStick, x, y float32) {
-	vg.device.Abs(uint16(stick.X.Axis), stick.X.Denormalize(x))
-	vg.device.Abs(uint16(stick.Y.Axis), stick.Y.Denormalize(y))
+	vg.device.SendAbsoluteEvent(stick.X.Axis, stick.X.Denormalize(x))
+	vg.device.SendAbsoluteEvent(stick.Y.Axis, stick.Y.Denormalize(y))
 	vg.device.SyncReport()
 
 }
 
 func (vg *virtualGamepad) moveAxis(absAxis *virtual_device.AbsAxis, p float32) {
-	vg.device.Abs(uint16(absAxis.Axis), absAxis.Denormalize(p))
+	vg.device.SendAbsoluteEvent(absAxis.Axis, absAxis.Denormalize(p))
 	vg.device.SyncReport()
 }
 

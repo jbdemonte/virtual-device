@@ -22,8 +22,8 @@ type VirtualTouchpad interface {
 	Touch(x, y, pressure float32)
 	MultiTouch(touchSlots []TouchSlot) []TouchSlot
 
-	ButtonPress(button linux.Button)
-	ButtonRelease(button linux.Button)
+	PressButton(button linux.Button)
+	ReleaseButton(button linux.Button)
 
 	Click(btn linux.Button)
 	DoubleClick(btn linux.Button)
@@ -147,17 +147,17 @@ func (vt *virtualTouchpad) Unregister() error {
 	return vt.device.Unregister()
 }
 
-func (vt *virtualTouchpad) absDenormalized(axis linux.AbsoluteAxis, x float32) {
+func (vt *virtualTouchpad) sendDenormalizedAbsolute(axis linux.AbsoluteAxis, x float32) {
 	axisAbs, exits := vt.axes[axis]
 	if exits {
-		vt.device.Abs(uint16(axis), axisAbs.Denormalize(x))
+		vt.device.SendAbsoluteEvent(axis, axisAbs.Denormalize(x))
 	}
 }
 
 func (vt *virtualTouchpad) Touch(x, y, pressure float32) {
-	vt.absDenormalized(linux.ABS_X, x)
-	vt.absDenormalized(linux.ABS_Y, y)
-	vt.absDenormalized(linux.ABS_PRESSURE, pressure)
+	vt.sendDenormalizedAbsolute(linux.ABS_X, x)
+	vt.sendDenormalizedAbsolute(linux.ABS_Y, y)
+	vt.sendDenormalizedAbsolute(linux.ABS_PRESSURE, pressure)
 	vt.device.SyncReport()
 }
 
@@ -183,8 +183,8 @@ func (vt *virtualTouchpad) assignSlotIfNeeded(touchSlots []TouchSlot) []TouchSlo
 // https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
 func (vt *virtualTouchpad) multiTouchA(touchSlots []TouchSlot) []TouchSlot {
 	for _, ts := range touchSlots {
-		vt.absDenormalized(linux.ABS_MT_POSITION_X, ts.X)
-		vt.absDenormalized(linux.ABS_MT_POSITION_Y, ts.Y)
+		vt.sendDenormalizedAbsolute(linux.ABS_MT_POSITION_X, ts.X)
+		vt.sendDenormalizedAbsolute(linux.ABS_MT_POSITION_Y, ts.Y)
 		vt.device.Sync(linux.SYN_MT_REPORT)
 	}
 	if len(touchSlots) == 0 {
@@ -199,23 +199,23 @@ func (vt *virtualTouchpad) multiTouchB(touchSlots []TouchSlot) []TouchSlot {
 	touchSlots = vt.assignSlotIfNeeded(touchSlots)
 
 	for _, ts := range touchSlots {
-		vt.device.Abs(uint16(linux.ABS_MT_SLOT), int32(ts.Slot))
+		vt.device.SendAbsoluteEvent(linux.ABS_MT_SLOT, int32(ts.Slot))
 		if ts.Pressure == 0 {
 			// release the Slot
 			vt.currentSlots[ts.Slot] = false
-			vt.device.Abs(uint16(linux.ABS_MT_TRACKING_ID), int32(-1))
+			vt.device.SendAbsoluteEvent(linux.ABS_MT_TRACKING_ID, int32(-1))
 			vt.fingerCount = vt.fingerCount - 1
 		} else if vt.currentSlots[ts.Slot] == false {
 			// lock the Slot
 			vt.currentSlots[ts.Slot] = true
-			vt.device.Abs(uint16(linux.ABS_MT_TRACKING_ID), int32(ts.Slot))
+			vt.device.SendAbsoluteEvent(linux.ABS_MT_TRACKING_ID, int32(ts.Slot))
 			vt.fingerCount = vt.fingerCount + 1
 		}
 		if ts.Pressure > 0 {
-			vt.absDenormalized(linux.ABS_MT_POSITION_X, ts.X)
-			vt.absDenormalized(linux.ABS_MT_POSITION_Y, ts.Y)
+			vt.sendDenormalizedAbsolute(linux.ABS_MT_POSITION_X, ts.X)
+			vt.sendDenormalizedAbsolute(linux.ABS_MT_POSITION_Y, ts.Y)
 		}
-		vt.absDenormalized(linux.ABS_PRESSURE, ts.Pressure)
+		vt.sendDenormalizedAbsolute(linux.ABS_PRESSURE, ts.Pressure)
 	}
 
 	watcher()
@@ -234,9 +234,9 @@ func (vt *virtualTouchpad) toggleFingerCount(count int, value bool) {
 	}
 	button := buttons[count-1]
 	if value {
-		vt.device.KeyPress(uint16(button))
+		vt.device.PressButton(button)
 	} else {
-		vt.device.KeyRelease(uint16(button))
+		vt.device.ReleaseButton(button)
 	}
 }
 
@@ -257,20 +257,20 @@ func (vt *virtualTouchpad) MultiTouch(touchSlots []TouchSlot) []TouchSlot {
 	return vt.multiTouchB(touchSlots)
 }
 
-func (vt *virtualTouchpad) ButtonPress(button linux.Button) {
-	vt.device.KeyPress(uint16(button))
+func (vt *virtualTouchpad) PressButton(button linux.Button) {
+	vt.device.PressButton(button)
 	vt.device.SyncReport()
 }
 
-func (vt *virtualTouchpad) ButtonRelease(button linux.Button) {
-	vt.device.KeyRelease(uint16(button))
+func (vt *virtualTouchpad) ReleaseButton(button linux.Button) {
+	vt.device.ReleaseButton(button)
 	vt.device.SyncReport()
 }
 
 func (vt *virtualTouchpad) Click(btn linux.Button) {
-	vt.ButtonPress(btn)
+	vt.PressButton(btn)
 	time.Sleep(time.Millisecond * time.Duration(vt.clickDelay))
-	vt.ButtonRelease(btn)
+	vt.ReleaseButton(btn)
 }
 
 func (vt *virtualTouchpad) DoubleClick(btn linux.Button) {
