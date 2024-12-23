@@ -1,12 +1,15 @@
 package keyboard
 
 import (
+	"fmt"
 	virtual_device "github.com/jbdemonte/virtual-device"
 	"github.com/jbdemonte/virtual-device/linux"
+	"time"
 )
 
 type VirtualKeyboard interface {
 	Register() error
+	Type(content string)
 	Unregister() error
 
 	PressKey(key linux.Key)
@@ -20,6 +23,7 @@ type VirtualKeyboardFactory interface {
 	WithKeys(keys []linux.Key) VirtualKeyboardFactory
 	WithLEDs(leds []linux.Led) VirtualKeyboardFactory
 	WithRepeat(delay, period int32) VirtualKeyboardFactory
+	WithKeyMap(keymap KeyMap) VirtualKeyboardFactory
 	Create() VirtualKeyboard
 }
 
@@ -33,6 +37,7 @@ type virtualKeyboardFactory struct {
 	keys     []linux.Key
 	leds     []linux.Led
 	repeat   *Repeat
+	keymap   KeyMap
 }
 
 func (f *virtualKeyboardFactory) WithDevice(device virtual_device.VirtualDevice) VirtualKeyboardFactory {
@@ -60,9 +65,15 @@ func (f *virtualKeyboardFactory) WithRepeat(delay, period int32) VirtualKeyboard
 	return f
 }
 
+func (f *virtualKeyboardFactory) WithKeyMap(keymap KeyMap) VirtualKeyboardFactory {
+	f.keymap = keymap
+	return f
+}
+
 func (f *virtualKeyboardFactory) Create() VirtualKeyboard {
 	vk := &virtualKeyboard{
 		device: f.device,
+		keymap: f.keymap,
 	}
 	if f.scanCode {
 		vk.device.WithScanCode()
@@ -77,6 +88,7 @@ func (f *virtualKeyboardFactory) Create() VirtualKeyboard {
 
 type virtualKeyboard struct {
 	device virtual_device.VirtualDevice
+	keymap KeyMap
 }
 
 func (vk *virtualKeyboard) Register() error {
@@ -97,4 +109,41 @@ func (vk *virtualKeyboard) ReleaseKey(key linux.Key) {
 
 func (vk *virtualKeyboard) SetLed(led linux.Led, state bool) {
 	vk.device.SetLed(led, state)
+}
+
+func (vk *virtualKeyboard) Type(content string) {
+	if vk.keymap == nil {
+		vk.keymap = getKeymap()
+	}
+	for _, char := range content {
+		if mapping, ok := vk.keymap[char]; ok {
+			if mapping.shiftRequired {
+				vk.device.PressKey(linux.KEY_LEFTSHIFT)
+			}
+			if mapping.altGrRequired {
+				vk.device.PressKey(linux.KEY_RIGHTALT)
+			}
+
+			vk.device.PressKey(mapping.keyCode)
+
+			vk.device.SyncReport()
+
+			time.Sleep(20 * time.Millisecond)
+
+			vk.device.ReleaseKey(mapping.keyCode)
+
+			if mapping.shiftRequired {
+				vk.device.ReleaseKey(linux.KEY_LEFTSHIFT)
+			}
+			if mapping.altGrRequired {
+				vk.device.ReleaseKey(linux.KEY_RIGHTALT)
+			}
+
+			vk.device.SyncReport()
+
+			time.Sleep(30 * time.Millisecond)
+		} else {
+			fmt.Printf("Warning: Character '%c' is not mapped\n", char)
+		}
+	}
 }
