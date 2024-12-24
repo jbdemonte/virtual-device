@@ -23,17 +23,31 @@ type Repeat struct {
 	period int32
 }
 
-func (a AbsAxis) Denormalize(value float32) int32 {
-	if value < -1 {
-		value = -1
-	} else if value > 1 {
+func (a AbsAxis) denormalizeUniDirectional(value float32) int32 {
+	if value < 0 {
+		value = 0
+	}
+	if value > 1 {
 		value = 1
 	}
-	if a.IsUnidirectional {
-		return int32(float32(a.Min) + (value)*float32(a.Max-a.Min))
-	}
+	return int32(float32(a.Min) + (value)*float32(a.Max-a.Min))
+}
 
+func (a AbsAxis) denormalizeBiDirectional(value float32) int32 {
+	if value < -1 {
+		value = -1
+	}
+	if value > 1 {
+		value = 1
+	}
 	return int32(float32(a.Min) + (value+1)*float32(a.Max-a.Min)/2)
+}
+
+func (a AbsAxis) Denormalize(value float32) int32 {
+	if a.IsUnidirectional {
+		return a.denormalizeUniDirectional(value)
+	}
+	return a.denormalizeBiDirectional(value)
 }
 
 type Config struct {

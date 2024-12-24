@@ -2,6 +2,7 @@ package keyboard
 
 import "github.com/jbdemonte/virtual-device/linux"
 
+// https://kbdlayout.info/kbdusx
 var qwertyKeyMap = KeyMap{
 	// Letters
 	'a': {linux.KEY_A, false, false}, 'A': {linux.KEY_A, true, false},
