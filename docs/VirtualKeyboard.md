@@ -11,23 +11,15 @@ The `VirtualKeyboard` interface defines the core functionalities of a virtual ke
 
 #### **Methods**
 
-- **Register**    
-  Registers the virtual keyboard device with the system.
+| **Action**     | **Description**                                                                      |
+|----------------|--------------------------------------------------------------------------------------|
+| **Register**   | Registers the virtual keyboard device with the system.                               |
+| **Unregister** | Unregisters the virtual keyboard device, releasing system resources.                 |
+| **PressKey**   | Simulates pressing a specific key.                                                   |
+| **ReleaseKey** | Simulates releasing a specific key.                                                  |
+| **Type**       | Simulates typing a string of characters using the virtual keyboard.                  |
+| **SetLed**     | Controls the state of a keyboard LED (e.g., Caps Lock or Num Lock).                  |
 
-- **Unregister**  
-  Unregisters the virtual keyboard device, releasing system resources.
-
-- **PressKey**  
-  Simulates pressing a specific key.
-
-- **ReleaseKey**  
-  Simulates releasing a specific key.
-
-- **Type**  
-  Simulates typing a string of characters using the virtual keyboard
-
-- **SetLed**  
-  Controls the state of a keyboard LED (e.g., Caps Lock or Num Lock)
 
 ####  **Keyboard Layout Detection in `Type`**
 
@@ -63,26 +55,16 @@ It supports method chaining for easy setup.
 
 #### **Methods**
 
-- **WithDevice**  
-  Attaches an existing `VirtualDevice` to the keyboard.
+| **Action**       | **Description**                                                                   |
+|------------------|-----------------------------------------------------------------------------------|
+| **WithDevice**   | Attaches an existing `VirtualDevice` to the keyboard.                             |
+| **WithScanCode** | Enables raw scan code support for the keyboard.                                  |
+| **WithKeys**     | Configures the list of supported keys for the keyboard.                          |
+| **WithLEDs**     | Configures the LEDs supported by the keyboard.                                   |
+| **WithRepeat**   | Sets the repeat delay and period for held keys.                                  |
+| **WithKeyMap**   | Specifies a custom keymap to use with the keyboard.                              |
+| **Create**       | Creates an instance of `VirtualKeyboard` with the specified configuration.        |
 
-- **WithScanCode**  
-  Enables raw scan code support for the keyboard.
-
-- **WithKeys**  
-  Configures the list of supported keys for the keyboard.
-
-- **WithLEDs**  
-  Configures the LEDs supported by the keyboard.
-
-- **WithRepeat**  
-  Sets the repeat delay and period for held keys.
-
-- **WithKeyMap**  
-  Specifies a custom keymap to use with the keyboard.
-
-- **Create**  
-  Creates an instance of `VirtualKeyboard` with the specified configuration.
 
 ---
 

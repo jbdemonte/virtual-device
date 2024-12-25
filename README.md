@@ -11,12 +11,11 @@ $ go get -u github.com/jbdemonte/virtual-device
 ## **Documentation - Quick access**
 
 - Base Class: [VirtualDevice](./docs/VirtualDevice.md)
-
-
 - Helper Class: [VirtualKeyboard](./docs/VirtualKeyboard.md)
 - Helper Class: [VirtualMouse](./docs/VirtualMouse.md)
 - Helper Class: [VirtualTouchpad](./docs/VirtualTouchpad.md)
 - Helper Class: [VirtualGamepad](./docs/VirtualGamepad.md)
+- Method Used: [How to create a new virtual device profile](./docs/Creation.md)
 
 ## Permission Issues
 
@@ -36,7 +35,7 @@ The **`virtual-device`** package provides a flexible framework for creating and 
 
 At the heart of the package is the **`VirtualDevice`** base class. This class provides the fundamental functionality required to create, configure, and manage virtual devices. It serves as the foundation upon which the helper classes are built.
 
-#### Base Class: `VirtualDevice`
+#### Base Class: [`VirtualDevice`](./docs/VirtualDevice.md)
 
 The **`VirtualDevice`** class encapsulates the low-level interactions with uinput, including:
 - Device creation and configuration (e.g., setting event types and capabilities).
@@ -49,22 +48,22 @@ This class is generic and can be used directly for custom virtual devices, but i
 
 To simplify common use cases, the package provides **helper classes** built on top of **`VirtualDevice`**, each tailored for specific device types:
 
-1. **`VirtualKeyboard`**:
+1. **[`VirtualKeyboard`](./docs/VirtualKeyboard.md)**:
    - A high-level interface for creating and managing virtual keyboards.
    - Includes helper methods for sending key presses, key releases, and full key strokes.
    - Example: `keyboard.Type("Hello World!")`.
 
-2. **`VirtualMouse`**:
+2. **[`VirtualMouse`](./docs/VirtualMouse.md)**:
    - Designed for creating virtual mice or pointing devices.
    - Provides methods for moving the cursor, scrolling, and simulating mouse button actions.
    - Example: `mouse.ClickLeft()` or `mouse.Move(0.5, 1)`.
 
-3. **`VirtualGamepad`**:
+3. **[`VirtualGamepad`](./docs/VirtualGamepad.md)**:
    - Tailored for creating virtual game controllers.
    - Supports axis movements, button presses, and handling force feedback effects.
    - Example: `gamepad.Press(gamepad.ButtonUp)` or `gamepad.MoveLeftStick(0.5, 1)`.
 
-4. **`VirtualTouchpad`**:
+4. **[`VirtualTouchpad`](./docs/VirtualTouchpad.md)**:
    - A high-level interface for creating and managing virtual touchpads.
    - Includes methods for simulating multitouch gestures, individual finger movements, and tap actions.
    - Supports both Protocol A and Protocol B for multitouch devices.
@@ -77,46 +76,46 @@ This package provides pre-configured factory functions to create virtual devices
 
 ##### Keyboard
 
-- **`NewVirtualGenericKeyboard`**  
+- **`NewGenericKeyboard`**  
   Creates a virtual generic keyboard.
 
-- **`NewVirtualLogitechG510`**  
+- **`NewLogitechG510`**  
   Creates a virtual keyboard with the layout and features of a Logitech G510 gaming keyboard
 
 ##### Mouse
 
-- **`NewVirtualGenericMouse`**  
+- **`NewGenericMouse`**  
   Creates a virtual generic mouse with basic movement, scrolling, and button support.
 
-- **`NewVirtualLogitechG402`**  
+- **`NewLogitechG402`**  
   Creates a virtual mouse with the layout and features of a Logitech G402 gaming mouse.
 
 ##### Touchpad
 
-- **`NewVirtualGenericTouchpad`**  
+- **`NewGenericTouchpad`**  
   Creates a virtual generic touchpad with basic multitouch, button support, and absolute axis handling.
 
 ##### Gamepads
 
-- **`NewVirtualSonyPS4`**  
+- **`NewSonyPS4`**  
   Creates a virtual controller with the layout and behavior of a Sony PS4 DualShock controller.
 
-- **`NewVirtualSonyPS5`**  
+- **`NewSonyPS5`**  
   Creates a virtual controller with the layout and behavior of a Sony PS5 DualSense controller.
 
-- **`NewVirtualSwitchPro`**  
+- **`NewSwitchPro`**  
   Creates a virtual controller with the layout and behavior of a Nintendo Switch Pro controller.
 
-- **`NewVirtualXBox360`**  
+- **`NewXBox360`**  
   Creates a virtual controller with the layout and behavior of an Xbox 360 controller.
 
-- **`NewVirtualXBoxOneS`**  
+- **`NewXBoxOneS`**  
   Creates a virtual controller with the layout and behavior of an Xbox One S controller.
 
-- **`NewVirtualStadia`**  
+- **`NewStadia`**  
   Creates a virtual controller with the layout and behavior of a Google Stadia controller.
 
-- **`NewVirtualSN30Pro`**  
+- **`NewSN30Pro`**  
   Creates a virtual controller with the layout and behavior of an 8BitDo SN30 Pro controller.
 
 

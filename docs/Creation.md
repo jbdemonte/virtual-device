@@ -1,6 +1,4 @@
-## Creating a new VirtualDevice 
-
-## How to Create a New Virtual Device
+## How to Create a New Virtual Device Profile
 
 The goal is to simulate the behavior of a real device as accurately as possible. To achieve this, follow these steps using a real device connected to an Ubuntu machine.
 

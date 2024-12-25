@@ -12,35 +12,19 @@ The `VirtualGamepad` interface defines the core functionalities of a virtual gam
 
 #### **Methods**
 
-- **Register**    
-  Registers the virtual gamepad device with the system.
+| **Action**         | **Description**                                                                                      |
+|--------------------|------------------------------------------------------------------------------------------------------|
+| **Register**       | Registers the virtual gamepad device with the system.                                               |
+| **Unregister**     | Unregisters the virtual gamepad device, releasing system resources.                                 |
+| **Press**          | Simulates pressing a button on the gamepad.                                                         |
+| **Release**        | Simulates releasing a button on the gamepad.                                                        |
+| **MoveLeftStick**  | Moves the left analog stick to the specified X and Y coordinates (values between -1 and 1).         |
+| **MoveLeftStickX** | Moves the left analog stick on the X-axis.                                                          |
+| **MoveLeftStickY** | Moves the left analog stick on the Y-axis.                                                          |
+| **MoveRightStick** | Moves the Right analog stick to the specified X and Y coordinates (values between -1 and 1).        |
+| **MoveRightStickX**| Moves the right analog stick on the X-axis.                                                         |
+| **MoveRightStickY**| Moves the right analog stick on the Y-axis.                                                         |
 
-- **Unregister**  
-  Unregisters the virtual gamepad device, releasing system resources.
-
-- **Press**  
-  Simulates pressing a button on the gamepad.
-
-- **Release**
-  Simulates releasing a button on the gamepad.
-
-- **MoveLeftStick**  
-  Moves the left analog stick to the specified X and Y coordinates (values between -1 and 1).
-
-- **MoveLeftStickX**  
-  Moves the left analog stick on the X-axis.
-
-- **MoveLeftStickY**  
-  Moves the left analog stick on the Y-axis.
-
-- **MoveRightStick**  
-  Moves the Right analog stick to the specified X and Y coordinates (values between -1 and 1).
-
-- **MoveRightStickX**  
-  Moves the right analog stick on the X-axis.
-
-- **MoveRightStickY**  
-  Moves the right analog stick on the Y-axis.
 
 #### **Gamepad Stick Handling**
 
@@ -76,20 +60,14 @@ The `VirtualGamepadFactory` is used to configure and create instances of `Virtua
 
 #### **Methods**
 
-- **WithDevice**  
-  Attaches an existing `VirtualDevice` to the gamepad.
+| **Action**         | **Description**                                                                       |
+|--------------------|---------------------------------------------------------------------------------------|
+| **WithDevice**     | Attaches an existing `VirtualDevice` to the gamepad.                                  |
+| **WithDigital**    | Configures the digital button mappings for the gamepad.                               |
+| **WithLeftStick**  | Configures the analog mappings for the left stick.                                    |
+| **WithRightStick** | Configures the analog mappings for the right stick.                                   |
+| **Create**         | Creates an instance of `VirtualGamepad` with the specified configuration.             |
 
-- **WithDigital**  
-  Configures the digital button mappings for the gamepad.
-
-- **WithLeftStick**  
-  Configures the analog mappings for the left stick.
-
-- **WithRightStick**  
-  Configures the analog mappings for the right stick.
-
-- **Create**  
-  Creates an instance of `VirtualGamepad` with the specified configuration.
 
 ---
 

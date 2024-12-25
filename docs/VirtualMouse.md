@@ -11,68 +11,29 @@ The `VirtualMouse` interface defines the core functionalities of a virtual mouse
 
 #### **Methods**
 
-- **Register**  
-  Registers the virtual mouse device with the system.
-
-- **Unregister**    
-  Unregisters the virtual mouse device, releasing system resources.
-
-- **Move**  
-  Simulates moving the mouse cursor by a relative amount in both X and Y directions.
-
-- **MoveX**  
-  Simulates moving the mouse cursor by a relative amount in the X direction.
-
-- **MoveY**  
-  Simulates moving the mouse cursor by a relative amount in the Y direction.
-
-- **ScrollVertical**  
-  Simulates vertical scrolling. Positive values scroll up; negative values scroll down.
-
-- **ScrollHorizontal**  
-  Simulates horizontal scrolling. Positive values scroll right; negative values scroll left.
-
-- **ButtonPress**  
-  Simulates pressing a mouse button.
-
-- **ButtonRelease**  
-  Simulates releasing a mouse button.
-
-- **ScrollUp**  
-  Convenience method to simulate a vertical scroll up.
-
-- **ScrollDown**  
-  Convenience method to simulate a vertical scroll down.
-
-- **ScrollLeft**  
-  Convenience method to simulate a horizontal scroll left.
-
-- **ScrollRight**  
-  Convenience method to simulate a horizontal scroll right.
-
-- **Click**  
-  Simulates a single click of the specified button.
-
-- **DoubleClick**  
-  Simulates a double click of the specified button.
-
-- **ClickLeft**  
-  Convenience method to simulate a single left click.
-
-- **ClickRight**  
-  Convenience method to simulate a single right click.
-
-- **ClickMiddle**  
-  Convenience method to simulate a single middle click.
-
-- **DoubleClickRight**  
-  Convenience method to simulate a double left click.
-
-- **DoubleClickRight**  
-  Convenience method to simulate a double right click.
-
-- **DoubleClickMiddle**    
-  Convenience method to simulate a double middle click.
+| **Action**           | **Description**                                                                                   |
+|----------------------|---------------------------------------------------------------------------------------------------|
+| **Register**         | Registers the virtual mouse device with the system.                                              |
+| **Unregister**       | Unregisters the virtual mouse device, releasing system resources.                                |
+| **Move**             | Simulates moving the mouse cursor by a relative amount in both X and Y directions.               |
+| **MoveX**            | Simulates moving the mouse cursor by a relative amount in the X direction.                       |
+| **MoveY**            | Simulates moving the mouse cursor by a relative amount in the Y direction.                       |
+| **ScrollVertical**   | Simulates vertical scrolling. Positive values scroll up; negative values scroll down.            |
+| **ScrollHorizontal** | Simulates horizontal scrolling. Positive values scroll right; negative values scroll left.       |
+| **ButtonPress**      | Simulates pressing a mouse button.                                                               |
+| **ButtonRelease**    | Simulates releasing a mouse button.                                                              |
+| **ScrollUp**         | Convenience method to simulate a vertical scroll up.                                             |
+| **ScrollDown**       | Convenience method to simulate a vertical scroll down.                                           |
+| **ScrollLeft**       | Convenience method to simulate a horizontal scroll left.                                         |
+| **ScrollRight**      | Convenience method to simulate a horizontal scroll right.                                        |
+| **Click**            | Simulates a single click of the specified button.                                                |
+| **DoubleClick**      | Simulates a double click of the specified button.                                                |
+| **ClickLeft**        | Convenience method to simulate a single left click.                                              |
+| **ClickRight**       | Convenience method to simulate a single right click.                                             |
+| **ClickMiddle**      | Convenience method to simulate a single middle click.                                            |
+| **DoubleClickRight** | Convenience method to simulate a double left click.                                              |
+| **DoubleClickRight** | Convenience method to simulate a double right click.                                             |
+| **DoubleClickMiddle**| Convenience method to simulate a double middle click.                                            |
 
 
 ##### **Custom Configuration**
@@ -90,23 +51,15 @@ It supports method chaining for easy setup.
 
 #### **Methods**
 
-- **WithDevice**  
-  Attaches an existing `VirtualDevice` to the mouse.
+| **Action**                    | **Description**                                                               |
+|-------------------------------|-------------------------------------------------------------------------------|
+| **WithDevice**                | Attaches an existing `VirtualDevice` to the mouse.                             |
+| **WithClickDelay**            | Sets the delay between press and release for a single click.                   |
+| **WithDoubleClickDelay**      | Sets the delay between two clicks for a double click.                          |
+| **WithHighResStepVertical**   | Configures the step size for high-resolution vertical scrolling.              |
+| **WithHighResStepHorizontal** | Configures the step size for high-resolution horizontal scrolling.         |
+| **Create**                    | Creates an instance of `VirtualMouse` with the specified configuration.        |
 
-- **WithClickDelay**  
-  Sets the delay between press and release for a single click.
-
-- **WithDoubleClickDelay**  
-  Sets the delay between two clicks for a double click.
-
-- **WithHighResStepVertical**  
-  Configures the step size for high-resolution vertical scrolling.
-
-- **WithHighResStepHorizontal**  
-  Configures the step size for high-resolution horizontal scrolling.
-
-- **Create**  
-  Creates an instance of `VirtualMouse` with the specified configuration.
 
 ---
 

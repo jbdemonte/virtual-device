@@ -1,8 +1,66 @@
-## VirtualDevice Documentation
+# VirtualDevice Documentation
 
 The `VirtualDevice` interface provides a flexible way to define and control virtual input devices on Linux. Below is a detailed guide on how to use it for various operations.
 
 ---
+
+## **Interface Definition**
+
+### **Configuration Methods**
+These methods allow you to configure the virtual device before registration.
+
+| **Action**           | **Description**                                                                                          |
+|----------------------|----------------------------------------------------------------------------------------------------------|
+| **`WithPath`**       | Sets the file path for the virtual device. Default is `/dev/uinput`.                                     |
+| **`WithMode`**       | Sets the file mode for the device file. Default is `0660`.                                               |
+| **`WithQueueLen`**   | Configures the event queue length. Default is `1024`.                                                    |
+| **`WithBusType`**    | Sets the device bus type (e.g., `linux.BUS_USB`).                                                        |
+| **`WithVendor`**     | Sets the vendor ID of the virtual device. (e.g. `sdl.USB_VENDOR_MICROSOFT`, `0x1234`).                   |
+| **`WithProduct`**    | Sets the product ID of the virtual device. (e.g. `sdl.USB_PRODUCT_XBOX_ONE_S`, `0x1234`).                |
+| **`WithVersion`**    | Sets the version number for the virtual device. (e.g. `0x01`).                                           |
+| **`WithName`**       | Sets the name of the virtual device.                                                                     |
+| **`WithKeys`**       | Specifies the keys supported by the device. (e.g. `[]linux.Key{linux.KEY_A, linux.KEY_B, linux.KEY_C}`). |
+| **`WithButtons`**    | Specifies the buttons supported by the device. (e.g. `[]linux.Button{linux.BTN_LEFT, linux.BTN_RIGHT}`). |
+| **`WithScanCode`**   | Enables scan code support.                                                                               |
+| **`WithAbsAxes`**    | Configures the absolute axes for the device.                                                             |
+| **`WithRelAxes`**    | Configures the relative axes for the device.                                                             |
+| **`WithRepeat`**     | Configures key repeat delay and period.                                                                  |
+| **`WithLEDs`**       | Specifies the LEDs supported by the device. (e.g. `[]linux.Led{linux.LED_NUML, linux.LED_CAPSL`).        |
+| **`WithProperties`** | Sets device-specific properties (e.g., `linux.INPUT_PROP_BUTTONPAD`).                                    |
+
+
+---
+
+### **Lifecycle Methods**
+These methods manage the virtual device's lifecycle.
+
+| **Action**       | **Description**                                                                     |
+|------------------|-------------------------------------------------------------------------------------|
+| **`Register`**   | Registers the virtual device with the system. Must be called before sending events. |
+| **`Unregister`** | Unregisters the virtual device, cleaning up resources.                              |
+
+
+---
+
+### **Event Handling Methods**
+These methods send or manipulate input events.
+
+| **Action**              | **Description**                                                 |
+|-------------------------|-----------------------------------------------------------------|
+| **`Send`**              | Sends a raw input event of the specified type, code, and value. |
+| **`Sync`**              | Sends a synchronization event (e.g., `linux.SYN_MT_REPORT`).    |
+| **`SyncReport`**        | Sends a default synchronization event (`linux.SYN_REPORT`).     |
+| **`PressKey`**          | Simulates a key press event.                                    |
+| **`ReleaseKey`**        | Simulates a key release event.                                  |
+| **`PressButton`**       | Simulates a button press event.                                 |
+| **`ReleaseButton`**     | Simulates a button release event.                               |
+| **`SendAbsoluteEvent`** | Sends an absolute axis event with the specified axis and value. |
+| **`SendRelativeEvent`** | Sends a relative axis event with the specified axis and value.  |
+| **`SendScanCode`**      | Sends a scan code event.                                        |
+| **`SetLed`**            | Toggles the state of an LED on the virtual device.              |
+
+
+## **Usage**
 
 ### **1. Configure a Virtual Device**
 Use the `With...` methods to configure your virtual device. These methods allow chaining for easy and clear initialization.
@@ -80,9 +138,9 @@ After sending input events, it’s important to synchronize them to ensure the i
 ---
 
 #### **Sync a Specific Event**
-Synchronize a specific event type (e.g., `SYN_REPORT`) to signal that the current event sequence is complete:
+Synchronize a specific event type (e.g., `SYN_MT_REPORT`) to signal that the current event sequence is complete:
 ```go
-device.Sync(linux.SYN_REPORT)
+device.Sync(linux.SYN_MT_REPORT)
 ```
 
 #### **Sync Report**
