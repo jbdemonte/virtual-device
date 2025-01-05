@@ -1,8 +1,8 @@
-## How to Create a New Virtual Device Profile
+## **How to Create a New Virtual Device Profile**
 
 The goal is to simulate the behavior of a real device as accurately as possible. To achieve this, follow these steps using a real device connected to an Ubuntu machine.
 
-### 1. Identify and Select the Target Device
+### **1. Identify and Select the Target Device**
 
 - Plug the device to your linux system
 - Run the `evtest` tool and select the connected device.
@@ -13,7 +13,7 @@ Example: Select device `22` to target:
 /dev/input/event22:	    Microsoft X-Box One S pad
 ```
 
-### 2. Configure the virtual device
+### **2. Configure the virtual device**
 
 The first screen in `evtest` displays the configuration of the selected device. Use this information to set up the virtual device programmatically.
 
@@ -92,8 +92,7 @@ Testing ... (interrupt to exit)
 Use this output to configure your virtual device to mimic the original device as closely as possible.  
 Map supported events, axes, and properties accordingly.
 
-
-### 3. Record Event Behavior
+### **3. Record Event Behavior**
 
 While still in `evtest`, interact with the real device (press buttons, move axes, etc.) to record the events it generates.  
 These events will define the behavior of your virtual device.
@@ -159,9 +158,14 @@ This is because the Linux kernel optimizes event reporting to avoid unnecessary 
 For example, if a multitouch slot remains unchanged, the kernel may skip logging it to reduce overhead. 
 Keep this in mind when analyzing event logs.
 
+_Tip_
 
+You can use `grep` to filter out specific events and make it easier to focus on others. For example, when pressing `L3`, the output might be flooded with absolute events. To ignore those:
+```shell
+evtest /dev/input/event22 | grep -v "ABS_" | grep -v "SYN_REPORT"
+```
 
-### 3. Implement the Virtual Device
+### **4. Implement the Virtual Device**
 
 Using the data collected in steps 2 and 3, configure your virtual device with the appropriate axes, buttons, and properties.
 This ensures that the virtual device closely mimics the original device's functionality.
@@ -190,11 +194,22 @@ if err != nil {
 defer device.Unregister()
 ```
 
-## Notes
+## **Notes**
 These steps ensure that your virtual device behaves as closely as possible to the original hardware.  
 While this guide uses `evtest` for input collection, other tools like `libevdev` can also provide detailed information about device behavior.
 
-## Debugging
+### **Multiple Device Entries in `evtest`**
+
+When using `evtest` or inspecting devices under `/dev/input/`, you may notice that some game controllers, such as the Nintendo Switch Joy-Con, appear multiple times as different input devices. This is especially common for devices with advanced motion-sensing capabilities like an IMU (Inertial Measurement Unit), Light / IR Sensors, **Audio Interfaces...
+
+#### **Why Does This Happen?**
+
+Many modern game controllers are designed to provide different types of input data through separate virtual devices. This allows the operating system to handle them independently. For example, a Joy-Con may expose:
+
+1. **Standard gamepad input device**: Handles traditional game controller inputs, such as button presses and joystick movements.
+2. **IMU input device**: Provides data from the accelerometer and gyroscope, which is used for motion-based controls.
+
+## **Debugging**
 You're free to manage the code as you see fit. However, when working with the binary, you can monitor the `ioctl` commands and their results using the following command:
 ```shell
 strace -e ioctl  ./main

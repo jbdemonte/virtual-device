@@ -30,6 +30,7 @@ type VirtualDevice interface {
 	WithRepeat(delay, period int32) VirtualDevice
 	WithLEDs(leds []linux.Led) VirtualDevice
 	WithProperties(properties []linux.InputProp) VirtualDevice
+	WithMiscEvents(events []linux.MiscEvent) VirtualDevice
 
 	Register() error
 	Unregister() error
@@ -44,6 +45,7 @@ type VirtualDevice interface {
 	SendAbsoluteEvent(axis linux.AbsoluteAxis, value int32)
 	SendRelativeEvent(axis linux.RelativeAxis, value int32)
 	SendScanCode(value int32)
+	SendMiscEvent(event linux.MiscEvent, value int32)
 	SetLed(led linux.Led, state bool)
 }
 
@@ -137,6 +139,12 @@ func (vd *virtualDevice) WithProperties(properties []linux.InputProp) VirtualDev
 	return vd
 }
 
+func (vd *virtualDevice) WithMiscEvents(miscEvents []linux.MiscEvent) VirtualDevice {
+	vd.config.miscEvents = miscEvents
+	return vd
+
+}
+
 func (vd *virtualDevice) Register() error {
 	if vd.isRegistered.Get() {
 		return nil
@@ -148,34 +156,20 @@ func (vd *virtualDevice) Register() error {
 
 	vd.fd = fd
 
-	err = vd.registerKeys()
-	if err != nil {
-		return vd.unregisterOnError(err)
+	steps := []func() error{
+		vd.registerKeys,
+		vd.registerScanCode,
+		vd.registerAxes,
+		vd.registerProperties,
+		vd.registerMiscEvents,
+		vd.registerLeds,
+		vd.createDevice,
 	}
 
-	err = vd.registerScanCode()
-	if err != nil {
-		return vd.unregisterOnError(err)
-	}
-
-	err = vd.registerAxes()
-	if err != nil {
-		return vd.unregisterOnError(err)
-	}
-
-	err = vd.registerProperties()
-	if err != nil {
-		return vd.unregisterOnError(err)
-	}
-
-	err = vd.registerLeds()
-	if err != nil {
-		return vd.unregisterOnError(err)
-	}
-
-	err = vd.createDevice()
-	if err != nil {
-		return err
+	for _, step := range steps {
+		if err := step(); err != nil {
+			return vd.unregisterOnError(err)
+		}
 	}
 
 	vd.pull()
@@ -386,6 +380,23 @@ func (vd *virtualDevice) registerProperties() error {
 	return nil
 }
 
+func (vd *virtualDevice) registerMiscEvents() error {
+	if len(vd.config.miscEvents) == 0 {
+		return nil
+	}
+	err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_MSC))
+	if err != nil {
+		return fmt.Errorf("failed to set UI_SET_EVBIT, EV_MSC: %v", err)
+	}
+	for _, event := range vd.config.miscEvents {
+		err := ioctl(vd.fd, linux.UI_SET_MSCBIT, uintptr(event))
+		if err != nil {
+			return fmt.Errorf("failed to set UI_SET_MSCBIT, 0x%x: %v", event, err)
+		}
+	}
+	return nil
+}
+
 func (vd *virtualDevice) registerLeds() error {
 	if len(vd.config.leds) == 0 {
 		return nil
@@ -528,6 +539,10 @@ func (vd *virtualDevice) SendRelativeEvent(axis linux.RelativeAxis, value int32)
 
 func (vd *virtualDevice) SendScanCode(value int32) {
 	vd.Send(uint16(linux.EV_MSC), uint16(linux.MSC_SCAN), value)
+}
+
+func (vd *virtualDevice) SendMiscEvent(event linux.MiscEvent, value int32) {
+	vd.Send(uint16(linux.EV_MSC), uint16(event), value)
 }
 
 func (vd *virtualDevice) SetLed(led linux.Led, state bool) {

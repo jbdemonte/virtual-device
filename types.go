@@ -59,6 +59,7 @@ type Config struct {
 	repeat       *Repeat
 	leds         []linux.Led
 	properties   []linux.InputProp
+	miscEvents   []linux.MiscEvent
 }
 
 type virtualDevice struct {

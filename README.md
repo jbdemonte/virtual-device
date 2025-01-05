@@ -1,8 +1,8 @@
-# Virtual Device
+# **Virtual Device**
 
 This package provides pure go functions to create virtual devices on Linux using [input](https://www.kernel.org/doc/html/latest/input/index.html) and [uinput](https://www.kernel.org/doc/html/latest/input/uinput.html) through [ioctl](https://en.wikipedia.org/wiki/Ioctl).
 
-## Installation
+## **Installation**
 
 ```sh
 $ go get -u github.com/jbdemonte/virtual-device
@@ -17,7 +17,7 @@ $ go get -u github.com/jbdemonte/virtual-device
 - Helper Class: [VirtualGamepad](./docs/VirtualGamepad.md)
 - Method Used: [How to create a new virtual device profile](./docs/Creation.md)
 
-## Permission Issues
+## **Permission Issues**
 
 Reading events from input devices or creating virtual `uinput` devices requires `$USER` to have the appropriate system-level permissions. 
 This can be accomplished by adding `$USER` to a group with read/write access to `/dev/input/event*` and `uinput` block devices.
@@ -27,7 +27,7 @@ Example on Debian based OS:
 sudo usermod -aG input $USER
 ```
 
-## Overview
+## **Overview**
 
 The **`virtual-device`** package provides a flexible framework for creating and managing virtual input devices on Linux using the uinput interface. It is designed to simplify the process of creating virtual devices like keyboards, mice, and gamepads, while offering a clean and extensible API.
 
@@ -35,7 +35,7 @@ The **`virtual-device`** package provides a flexible framework for creating and 
 
 At the heart of the package is the **`VirtualDevice`** base class. This class provides the fundamental functionality required to create, configure, and manage virtual devices. It serves as the foundation upon which the helper classes are built.
 
-#### Base Class: [`VirtualDevice`](./docs/VirtualDevice.md)
+#### **Base Class: [`VirtualDevice`](./docs/VirtualDevice.md)**
 
 The **`VirtualDevice`** class encapsulates the low-level interactions with uinput, including:
 - Device creation and configuration (e.g., setting event types and capabilities).
@@ -44,7 +44,7 @@ The **`VirtualDevice`** class encapsulates the low-level interactions with uinpu
 
 This class is generic and can be used directly for custom virtual devices, but it requires detailed knowledge of the underlying input subsystem.
 
-#### Helper Classes
+#### **Helper Classes**
 
 To simplify common use cases, the package provides **helper classes** built on top of **`VirtualDevice`**, each tailored for specific device types:
 
@@ -67,14 +67,13 @@ To simplify common use cases, the package provides **helper classes** built on t
    - A high-level interface for creating and managing virtual touchpads.
    - Includes methods for simulating multitouch gestures, individual finger movements, and tap actions.
    - Supports both Protocol A and Protocol B for multitouch devices.
-   - Example: `	slots := tp.MultiTouch([]touchpad.TouchSlot{{X: 0, Y: 0, Pressure: 0.5}, {X: 0.2, Y: 0.2, Pressure: 0.5} })`.
+   - Example: `slots := tp.MultiTouch([]touchpad.TouchSlot{{X: 0, Y: 0, Pressure: 0.5}, {X: 0.2, Y: 0.2, Pressure: 0.5} })`.
 
-
-#### Pre-Configured Virtual Device Factories
+#### **Pre-Configured Virtual Device Factories**
 
 This package provides pre-configured factory functions to create virtual devices that simulate specific devices. These functions simplify the creation of virtual devices by providing ready-made configurations for popular hardware such as Sony PS5, Nintendo Switch Pro controllers, and more.
 
-##### Keyboard
+##### **Keyboard**
 
 - **`NewGenericKeyboard`**  
   Creates a virtual generic keyboard.
@@ -82,7 +81,7 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewLogitechG510`**  
   Creates a virtual keyboard with the layout and features of a Logitech G510 gaming keyboard
 
-##### Mouse
+##### **Mouse**
 
 - **`NewGenericMouse`**  
   Creates a virtual generic mouse with basic movement, scrolling, and button support.
@@ -90,12 +89,12 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewLogitechG402`**  
   Creates a virtual mouse with the layout and features of a Logitech G402 gaming mouse.
 
-##### Touchpad
+##### **Touchpad**
 
 - **`NewGenericTouchpad`**  
   Creates a virtual generic touchpad with basic multitouch, button support, and absolute axis handling.
 
-##### Gamepads
+##### **Gamepads**
 
 - **`NewSonyPS4`**  
   Creates a virtual controller with the layout and behavior of a Sony PS4 DualShock controller.
@@ -127,20 +126,24 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewSN30Pro`**  
   Creates a virtual controller with the layout and behavior of an 8BitDo SN30 Pro controller.
 
+##### **[IMU](./docs/IMU.md)**
+
+- **`NewJoyConIMU`**  
+  Creates a virtual controller with the layout and behavior of an Nintendo Switch JoyCon IMU.
+
 
 ##### **Advantages of Using Pre-Configured Factories**
-**Ease of Use** 
+**Ease of Use**  
 No need to manually configure each aspect of the virtual device. These functions provide pre-set mappings and layouts.
 
 **Accuracy**  
 Each factory function is designed to closely match the behavior and layout of the real-world hardware.
 
-**Flexibility** 
+**Flexibility**   
 Use the created devices as starting points and customize them further if needed.
 
 **Rapid Prototyping**  
 Quickly test and simulate hardware without requiring physical devices.
-
 
 #### **Linux Input Constants**
 
@@ -162,5 +165,5 @@ linux.LED_CAPSL  // Represents the Caps Lock LED
 linux.LED_NUML  // Represents the Num Lock LED
 ```
 
-## Credits
+## **Credits**
 Package freely inspired by [kenshaw/evdev](https://github.com/kenshaw/evdev), [bendahl/uinput](https://github.com/bendahl/uinput) and some others.
