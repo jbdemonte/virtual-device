@@ -4,8 +4,6 @@ package gamepad
 
 type Button int
 
-type HatDirection int
-
 const (
 	ButtonUp Button = iota + 1
 	ButtonRight
