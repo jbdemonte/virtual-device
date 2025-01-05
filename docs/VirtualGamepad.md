@@ -12,19 +12,66 @@ The `VirtualGamepad` interface defines the core functionalities of a virtual gam
 
 #### **Methods**
 
-| **Action**         | **Description**                                                                                      |
-|--------------------|------------------------------------------------------------------------------------------------------|
-| **Register**       | Registers the virtual gamepad device with the system.                                               |
-| **Unregister**     | Unregisters the virtual gamepad device, releasing system resources.                                 |
-| **Press**          | Simulates pressing a button on the gamepad.                                                         |
-| **Release**        | Simulates releasing a button on the gamepad.                                                        |
-| **MoveLeftStick**  | Moves the left analog stick to the specified X and Y coordinates (values between -1 and 1).         |
-| **MoveLeftStickX** | Moves the left analog stick on the X-axis.                                                          |
-| **MoveLeftStickY** | Moves the left analog stick on the Y-axis.                                                          |
-| **MoveRightStick** | Moves the Right analog stick to the specified X and Y coordinates (values between -1 and 1).        |
-| **MoveRightStickX**| Moves the right analog stick on the X-axis.                                                         |
-| **MoveRightStickY**| Moves the right analog stick on the Y-axis.                                                         |
+| **Action**          | **Description**                                                                              |
+|---------------------|----------------------------------------------------------------------------------------------|
+| **Register**        | Registers the virtual gamepad device with the system.                                        |
+| **Unregister**      | Unregisters the virtual gamepad device, releasing system resources.                          |
+| **Press**           | Simulates pressing a button on the gamepad.                                                  |
+| **Release**         | Simulates releasing a button on the gamepad.                                                 |
+| **MoveLeftStick**   | Moves the left analog stick to the specified X and Y coordinates (values between -1 and 1).  |
+| **MoveLeftStickX**  | Moves the left analog stick on the X-axis.                                                   |
+| **MoveLeftStickY**  | Moves the left analog stick on the Y-axis.                                                   |
+| **MoveRightStick**  | Moves the Right analog stick to the specified X and Y coordinates (values between -1 and 1). |
+| **MoveRightStickX** | Moves the right analog stick on the X-axis.                                                  |
+| **MoveRightStickY** | Moves the right analog stick on the Y-axis.                                                  |
 
+#### **Standardized Gamepad Input Handling**
+
+To ensure consistent behavior across different virtual gamepad implementations, this package standardizes gamepad inputs using predefined constants that align with the **Debian gamepad API** specification. These constants are derived from the [Linux Gamepad Documentation](https://www.kernel.org/doc/Documentation/input/gamepad.txt) and cover all common gamepad buttons.
+
+![Linux Gamepad API](Linux%20Gamepad%20API.png "Linux Gamepad API")
+
+---
+
+##### **Button Constants**
+
+The `gamepad.Button` type defines a set of constants representing standard gamepad buttons:
+
+| **Constant**      | **Description**              |
+|-------------------|------------------------------|
+| `ButtonUp`        | D-pad up                     |
+| `ButtonRight`     | D-pad right                  |
+| `ButtonDown`      | D-pad down                   |
+| `ButtonLeft`      | D-pad left                   |
+| `ButtonNorth`     | Top face button              |
+| `ButtonEast`      | Right face button            |
+| `ButtonSouth`     | Bottom face button           |
+| `ButtonWest`      | Left face button             |
+| `ButtonL1`        | Left shoulder button         |
+| `ButtonR1`        | Right shoulder button        |
+| `ButtonL2`        | Left trigger button          |
+| `ButtonR2`        | Right trigger button         |
+| `ButtonL3`        | Left stick button (pressed)  |
+| `ButtonR3`        | Right stick button (pressed) |
+| `ButtonSelect`    | Select button                |
+| `ButtonStart`     | Start button                 |
+| `ButtonMode`      | Mode or system button        |
+| `ButtonFiller1`   | Custom button 1              |
+| `ButtonFiller2`   | Custom button 2              |
+| `ButtonFiller3`   | Custom button 3              |
+| `ButtonFiller4`   | Custom button 4              |
+
+
+##### Why Standardization Matters
+
+By standardizing the gamepad inputs:
+
+- **Cross-Platform Consistency**: Ensures that virtual gamepads behave consistently across different systems and platforms.
+- **Compatibility**: Aligns with the widely used Debian gamepad API, ensuring better support for applications that rely on standard gamepad behavior. 
+- **Simplified Development**: Developers can rely on a consistent set of button and direction constants, making
+
+
+---
 
 #### **Gamepad Stick Handling**
 
