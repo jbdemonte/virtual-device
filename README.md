@@ -112,6 +112,9 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewXBoxOneS`**  
   Creates a virtual controller with the layout and behavior of an Xbox One S controller.
 
+- **`NewXBoxOneElite2`**  
+  Creates a virtual controller with the layout and behavior of an Xbox One Elite 2 controller.
+
 - **`NewStadia`**  
   Creates a virtual controller with the layout and behavior of a Google Stadia controller.
 
