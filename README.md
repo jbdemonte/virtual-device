@@ -106,6 +106,12 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewSwitchPro`**  
   Creates a virtual controller with the layout and behavior of a Nintendo Switch Pro controller.
 
+- **`NewJoyConR`**  
+  Creates a virtual controller with the layout and behavior of a Nintendo Switch JoyCon Right.
+
+- **`NewJoyConL`**  
+  Creates a virtual controller with the layout and behavior of a Nintendo Switch JoyCon Left.
+
 - **`NewXBox360`**  
   Creates a virtual controller with the layout and behavior of an Xbox 360 controller.
 
