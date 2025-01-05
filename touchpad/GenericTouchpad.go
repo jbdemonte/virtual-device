@@ -36,5 +36,4 @@ func NewGenericTouchpad() VirtualTouchpad {
 			linux.INPUT_PROP_POINTER, linux.INPUT_PROP_BUTTONPAD,
 		}).
 		Create()
-
 }

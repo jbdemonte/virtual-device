@@ -166,17 +166,27 @@ if err != nil {
 Here’s how to simulate typing a string using a virtual keyboard:
 
 ```go
-device := virtual_device.NewVirtualDevice().
-   WithBusType(linux.BUS_USB).
-   WithVendor(0xDEAD).
-   WithProduct(0xBABE).
-   WithVersion(0x01).
-   WithName("Virtual Keyboard").
-   WithKeys([]linux.Key{linux.KEY_A, linux.KEY_B, linux.KEY_C})
+package main
 
-device.Register()
-defer device.Unregister()
+import (
+	"fmt"
+	virtual_device "github.com/jbdemonte/virtual-device"
+	"github.com/jbdemonte/virtual-device/linux"
+)
 
-device.PressKey(linux.KEY_B)
-device.ReleaseKey(linux.KEY_B)
+func main() {
+	device := virtual_device.NewVirtualDevice().
+		WithBusType(linux.BUS_USB).
+		WithVendor(0xDEAD).
+		WithProduct(0xBABE).
+		WithVersion(0x01).
+		WithName("Virtual Keyboard").
+		WithKeys([]linux.Key{linux.KEY_A, linux.KEY_B, linux.KEY_C})
+
+	device.Register()
+	defer device.Unregister()
+
+	device.PressKey(linux.KEY_B)
+	device.ReleaseKey(linux.KEY_B)
+}
 ```

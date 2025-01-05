@@ -91,21 +91,54 @@ The `VirtualTouchpadFactory` is used to configure and create instances of `Virtu
 Here’s how to configure and use a `VirtualTouchpad`:
 
 ```go
-touchpad := virtual_device.NewVirtualTouchpadFactory().
-    WithAxes([]virtual_device.AbsAxis{
-        {Axis: linux.ABS_X, Min: 0, Max: 1024},
-        {Axis: linux.ABS_Y, Min: 0, Max: 768},
-    }).
-    WithButtons([]linux.Button{linux.BTN_LEFT, linux.BTN_RIGHT}).
-    WithClickDelay(50).
-    WithDoubleClickDelay(250).
-	Create()
+package main
+
+import (
+  "fmt"
+  virtual_device "github.com/jbdemonte/virtual-device"
+  "github.com/jbdemonte/virtual-device/linux"
+  "github.com/jbdemonte/virtual-device/touchpad"
+  "log"
+  "time"
+)
+
+func main() {
+    tp := touchpad.NewVirtualTouchpadFactory().
+            WithDevice(
+              virtual_device.NewVirtualDevice().
+                WithBusType(linux.BUS_USB).
+                WithVendor(0x02).
+                WithProduct(0x07).
+                WithVersion(0x01).
+                WithName("Synaptics TouchPad"),
+            ).
+            WithAxes([]virtual_device.AbsAxis{
+              {Axis: linux.ABS_X, Min: 1472, Value: 1472, Max: 5472, Resolution: 40},
+              {Axis: linux.ABS_Y, Min: 1408, Value: 1408, Max: 4448, Resolution: 40},
+              {Axis: linux.ABS_PRESSURE, Min: 0, Value: 0, Max: 255, IsUnidirectional: true},
+              {Axis: linux.ABS_MT_SLOT, Min: 0, Value: 0, Max: 4},
+              {Axis: linux.ABS_MT_POSITION_X, Min: 1472, Value: 0, Max: 5472, Resolution: 40},
+              {Axis: linux.ABS_MT_POSITION_Y, Min: 1408, Value: 1408, Max: 4448, Resolution: 40},
+              {Axis: linux.ABS_MT_TRACKING_ID, Min: 0, Value: 0, Max: 65535},
+            }).
+            WithButtons([]linux.Button{
+              linux.BTN_LEFT,
+              linux.BTN_RIGHT,
+              linux.BTN_TOOL_FINGER,
+              linux.BTN_TOUCH,
+              linux.BTN_TOOL_DOUBLETAP,
+              linux.BTN_TOOL_TRIPLETAP,
+            }).
+            WithProperties([]linux.InputProp{
+              linux.INPUT_PROP_POINTER, linux.INPUT_PROP_BUTTONPAD,
+            }).
+      Create() 
     
-    err := touchpad.Register()
+    err := tp.Register()
     if err != nil {
-        log.Fatalf("Failed to register virtual touchpad: %v", err)
+      log.Fatalf("Failed to register virtual touchpad: %v", err)
     }
-    defer touchpad.Unregister()
+    defer tp.Unregister()
     
     
     fmt.Println("2 fingers")
@@ -123,8 +156,8 @@ touchpad := virtual_device.NewVirtualTouchpadFactory().
     time.Sleep(2_000 * time.Millisecond)
     fmt.Println("add one finger")
     slots = append(slots, touchpad.TouchSlot{
-        {X: -0.3, Y:-0.4, Pressure: 0.2}
-	)
+        {X: -0.3, Y:-0.4, Pressure: 0.2},
+    })
     slots = tp.MultiTouch(slots)
     
     time.Sleep(2_000 * time.Millisecond)
@@ -133,8 +166,8 @@ touchpad := virtual_device.NewVirtualTouchpadFactory().
     slots[1].Pressure = 0
     slots[2].Pressure = 0
     slots = tp.MultiTouch(slots)
-    
 
+}
 ```
 
 This documentation outlines the essential steps for configuring, registering, and using a `VirtualTouchpad` to simulate touch inputs and gestures.

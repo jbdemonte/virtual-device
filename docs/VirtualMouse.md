@@ -68,29 +68,38 @@ It supports method chaining for easy setup.
 Here’s how to configure and use a `VirtualMouse`:
 
 ```go
-// Create a virtual mouse factory
-mouse := virtual_device.NewVirtualMouseFactory().
-    WithClickDelay(50).
-    WithDoubleClickDelay(250).
-    WithHighResStepVertical(120).
-    WithHighResStepHorizontal(120).
-    Create()
+package main
 
-err := mouse.Register()
-if err != nil {
-    log.Fatalf("Failed to register virtual mouse: %v", err)
+import (
+	"fmt"
+	"github.com/jbdemonte/virtual-device/mouse"
+	"log"
+)
+
+func main() {
+	m := mouse.NewVirtualMouseFactory().
+		WithClickDelay(50).
+		WithDoubleClickDelay(250).
+		WithHighResStepVertical(120).
+		WithHighResStepHorizontal(120).
+		Create()
+
+	err := m.Register()
+	if err != nil {
+		log.Fatalf("Failed to register virtual mouse: %v", err)
+	}
+	defer m.Unregister()
+
+	m.Move(100, -50) // Move 100 units right and 50 units up
+
+	// Simulate clicks
+	m.ClickLeft()        // Single left click
+	m.DoubleClickRight() // Double right click
+
+	// Simulate scrolling
+	m.ScrollUp()
+	m.ScrollHorizontal(-1) // Scroll left
 }
-defer mouse.Unregister()
-
-mouse.Move(100, -50) // Move 100 units right and 50 units up
-
-// Simulate clicks
-mouse.ClickLeft()         // Single left click
-mouse.DoubleClickRight()  // Double right click
-
-// Simulate scrolling
-mouse.ScrollUp()
-mouse.ScrollHorizontal(-1) // Scroll left
 ```
 
 This documentation outlines the essential steps for configuring, registering, and using a `VirtualMouse` to simulate mouse inputs and control related features.

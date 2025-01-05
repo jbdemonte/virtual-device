@@ -73,21 +73,32 @@ It supports method chaining for easy setup.
 Here’s how to configure and use a `VirtualKeyboard`:
 
 ```go
-keyboard := virtual_device.NewVirtualKeyboardFactory().
-    WithKeys([]linux.Key{linux.KEY_A, linux.KEY_B, linux.KEY_C}).
-    WithLEDs([]linux.Led{linux.LED_CAPSL}).
-    WithRepeat(250, 33).
-    Create()
+package main
 
-err := keyboard.Register()
-if err != nil {
-    log.Fatalf("Failed to register virtual keyboard: %v", err)
+import (
+   "fmt"
+   "github.com/jbdemonte/virtual-device/keyboard"
+   "github.com/jbdemonte/virtual-device/linux"
+   "log"
+)
+
+func main() {
+   kb := keyboard.NewVirtualKeyboardFactory().
+      WithKeys([]linux.Key{linux.KEY_A, linux.KEY_B, linux.KEY_C}).
+      WithLEDs([]linux.Led{linux.LED_CAPSL}).
+      WithRepeat(250, 33).
+      Create()
+
+   err := kb.Register()
+   if err != nil {
+      log.Fatalf("Failed to register virtual keyboard: %v", err)
+   }
+   defer kb.Unregister()
+
+   kb.Type("Hello, world!")
+
+   kb.SetLed(linux.LED_CAPSL, true)
 }
-defer keyboard.Unregister()
-
-keyboard.Type("Hello, world!")
-
-keyboard.SetLed(linux.LED_CAPSL, true)
 ```
 
 This documentation outlines the essential steps for configuring, registering, and using a `VirtualKeyboard` to simulate keyboard inputs and control related features.

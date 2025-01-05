@@ -73,40 +73,83 @@ The `VirtualGamepadFactory` is used to configure and create instances of `Virtua
 
 ### **Example Usage**
 
-Here’s how to configure and use a `VirtualGamepad`:
-
+Here’s how to configure and use a custom `VirtualGamepad` (based on the predefined [XBox360](../gamepad/XBox360.go)):
 ```go
-gamepad := virtual_device.NewVirtualGamepadFactory().
-    WithDigital(MappingDigital{
-        Buttons: MappingButtons{
-            ButtonA: linux.BTN_SOUTH,
-            ButtonB: linux.BTN_EAST,
-            ButtonX: linux.BTN_WEST,
-            ButtonY: linux.BTN_NORTH,
-        },
-    }).
-    WithLeftStick(MappingStick{
-        X: linux.ABS_X,
-        Y: linux.ABS_Y,
-    }).
-    WithRightStick(MappingStick{
-        X: linux.ABS_RX,
-        Y: linux.ABS_RY,
-    }).
-	Create()
+package main
 
-err := gamepad.Register()
-if err != nil {
-    log.Fatalf("Failed to register virtual gamepad: %v", err)
+import (
+	"fmt"
+	virtual_device "github.com/jbdemonte/virtual-device"
+	"github.com/jbdemonte/virtual-device/gamepad"
+	"github.com/jbdemonte/virtual-device/linux"
+	"github.com/jbdemonte/virtual-device/sdl"
+	"log"
+)
+
+func main() {
+    g := gamepad.NewVirtualGamepadFactory().
+            WithDevice(
+                virtual_device.
+                    NewVirtualDevice().
+                    WithBusType(linux.BUS_USB).
+                    WithVendor(sdl.USB_VENDOR_MICROSOFT).
+                    WithProduct(sdl.USB_PRODUCT_XBOX360_XUSB_CONTROLLER).
+                    WithVersion(0x107).
+                    WithName("Xbox 360 Wireless Receiver (XBOX)"),
+            ).
+            WithDigital(
+                gamepad.MappingDigital{
+                    gamepad.ButtonSouth: linux.BTN_SOUTH,
+                    gamepad.ButtonEast:  linux.BTN_EAST,
+                    gamepad.ButtonNorth: linux.BTN_WEST,
+                    gamepad.ButtonWest:  linux.BTN_NORTH,
+    
+                    gamepad.ButtonSelect: linux.BTN_SELECT,
+                    gamepad.ButtonStart:  linux.BTN_START,
+                    gamepad.ButtonMode:   linux.BTN_MODE,
+    
+                    gamepad.ButtonUp:    []gamepad.InputEvent{linux.BTN_TRIGGER_HAPPY3, gamepad.HatEvent{Axis: linux.ABS_HAT0Y, Value: -1}},
+                    gamepad.ButtonDown:  []gamepad.InputEvent{linux.BTN_TRIGGER_HAPPY4, gamepad.HatEvent{Axis: linux.ABS_HAT0Y, Value: 1}},
+                    gamepad.ButtonLeft:  []gamepad.InputEvent{linux.BTN_TRIGGER_HAPPY1, gamepad.HatEvent{Axis: linux.ABS_HAT0X, Value: -1}},
+                    gamepad.ButtonRight: []gamepad.InputEvent{linux.BTN_TRIGGER_HAPPY2, gamepad.HatEvent{Axis: linux.ABS_HAT0X, Value: 1}},
+    
+                    gamepad.ButtonL1: linux.BTN_TL,
+                    gamepad.ButtonR1: linux.BTN_TR,
+    
+                    gamepad.ButtonL2: virtual_device.AbsAxis{Axis: linux.ABS_Z, Min: 0, Value: 0, Max: 255},
+                    gamepad.ButtonR2: virtual_device.AbsAxis{Axis: linux.ABS_RZ, Min: 0, Value: 0, Max: 255},
+    
+                    gamepad.ButtonL3: linux.BTN_THUMBL,
+                    gamepad.ButtonR3: linux.BTN_THUMBR,
+                },
+            ).
+            WithLeftStick(
+                gamepad.MappingStick{
+                    X: virtual_device.AbsAxis{Axis: linux.ABS_X, Min: -32768, Value: 0, Max: 32767, Flat: 128, Fuzz: 16},
+                    Y: virtual_device.AbsAxis{Axis: linux.ABS_Y, Min: -32768, Value: 0, Max: 32767, Flat: 128, Fuzz: 16},
+                },
+            ).
+            WithRightStick(
+                gamepad.MappingStick{
+                    X: virtual_device.AbsAxis{Axis: linux.ABS_RX, Min: -32768, Value: 0, Max: 32767, Flat: 128, Fuzz: 16},
+                    Y: virtual_device.AbsAxis{Axis: linux.ABS_RY, Min: -32768, Value: 0, Max: 32767, Flat: 128, Fuzz: 16},
+                },
+            ).
+            Create()
+    
+    err := g.Register()
+    if err != nil {
+		log.Fatalf("Failed to register virtual gamepad: %v", err)
+    }
+    defer g.Unregister()
+    
+    g.Press(gamepad.ButtonA)
+    g.Release(gamepad.ButtonA)
+    
+    g.MoveLeftStick(0.5, -0.5)
+    
+    g.MoveRightStick(-1.0, 1.0)
+	
 }
-defer gamepad.Unregister()
-
-gamepad.Press(ButtonA)
-gamepad.Release(ButtonA)
-
-gamepad.MoveLeftStick(0.5, -0.5)
-
-gamepad.MoveRightStick(-1.0, 1.0)
 ```
-
 This documentation outlines the essential steps for configuring, registering, and using a `VirtualGamepad` to simulate gamepad inputs and analog stick movements.
