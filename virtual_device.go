@@ -44,7 +44,6 @@ type VirtualDevice interface {
 	ReleaseButton(key linux.Button)
 	SendAbsoluteEvent(axis linux.AbsoluteAxis, value int32)
 	SendRelativeEvent(axis linux.RelativeAxis, value int32)
-	SendScanCode(value int32)
 	SendMiscEvent(event linux.MiscEvent, value int32)
 	SetLed(led linux.Led, state bool)
 }
@@ -535,10 +534,6 @@ func (vd *virtualDevice) SendAbsoluteEvent(axis linux.AbsoluteAxis, value int32)
 
 func (vd *virtualDevice) SendRelativeEvent(axis linux.RelativeAxis, value int32) {
 	vd.Send(uint16(linux.EV_REL), uint16(axis), value)
-}
-
-func (vd *virtualDevice) SendScanCode(value int32) {
-	vd.Send(uint16(linux.EV_MSC), uint16(linux.MSC_SCAN), value)
 }
 
 func (vd *virtualDevice) SendMiscEvent(event linux.MiscEvent, value int32) {

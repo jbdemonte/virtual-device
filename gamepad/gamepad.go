@@ -160,7 +160,7 @@ func (vg *virtualGamepad) Press(button Button) {
 		case linux.Key:
 			vg.device.PressKey(e)
 		case MSCScanCode:
-			vg.device.SendScanCode(int32(e))
+			vg.device.SendMiscEvent(linux.MSC_SCAN, int32(e))
 		case HatEvent:
 			vg.device.SendAbsoluteEvent(e.Axis, e.Value)
 		case virtual_device.AbsAxis:
@@ -193,7 +193,7 @@ func (vg *virtualGamepad) Release(button Button) {
 		case linux.Key:
 			vg.device.ReleaseKey(e)
 		case MSCScanCode:
-			vg.device.SendScanCode(int32(e))
+			vg.device.SendMiscEvent(linux.MSC_SCAN, int32(e))
 		case HatEvent:
 			vg.device.SendAbsoluteEvent(e.Axis, 0)
 		case virtual_device.AbsAxis:

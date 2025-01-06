@@ -56,7 +56,7 @@ These methods send or manipulate input events.
 | **`ReleaseButton`**     | Simulates a button release event.                               |
 | **`SendAbsoluteEvent`** | Sends an absolute axis event with the specified axis and value. |
 | **`SendRelativeEvent`** | Sends a relative axis event with the specified axis and value.  |
-| **`SendScanCode`**      | Sends a scan code event.                                        |
+| **`SendMiscEvent`**     | Sends a miscellaneous event (`linux.MSC_XXX`).                  |
 | **`SetLed`**            | Toggles the state of an LED on the virtual device.              |
 
 
@@ -126,10 +126,10 @@ device.SetLed(linux.LED_CAPSL, true)  // Turn on the Caps Lock LED
 device.SetLed(linux.LED_CAPSL, false)  // Turn off the Caps Lock LED
 ```
 
-#### **Scan Codes**
-Send raw scan codes to simulate hardware-level key events:
+#### **Misc Events**
+Send miscellaneous events, including raw scan codes, to simulate hardware-level key events:
 ```go
-device.SendScanCode(0x1E)  // Send the scan code for the "A" key
+device.SendMiscEvent(linux.EV_MSC_SCAN, 0x1E) // Send the scan code for the "A" key
 ```
 
 ### **4. Synchronize Events**
