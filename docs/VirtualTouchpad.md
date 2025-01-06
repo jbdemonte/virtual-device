@@ -19,20 +19,20 @@ _Pressure is between 0 and 1_
 
 #### **Methods**
 
-| **Action**           | **Description**                                                                                                   |
-|----------------------|-------------------------------------------------------------------------------------------------------------------|
-| **Register**         | Registers the virtual touchpad device with the system.                                                            |
-| **Unregister**       | Unregisters the virtual touchpad device, releasing system resources.                                              |
-| **Touch**            | Simulates a single touch event at the specified coordinates with pressure.                                        |
+| **Action**           | **Description**                                                                                                                                                                                        |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Register**         | Registers the virtual touchpad device with the system.                                                                                                                                                 |
+| **Unregister**       | Unregisters the virtual touchpad device, releasing system resources.                                                                                                                                   |
+| **Touch**            | Simulates a single touch event at the specified coordinates with pressure.                                                                                                                             |
 | **MultiTouch**       | Simulates multitouch events using multiple touch slots. Returns the updated touch slots after the gesture.<br>_The slot IDs are automatically managed, so reuse the previous result on the next call._ |
-| **PressButton**      | Simulates pressing a touchpad button.                                                                             |
-| **ReleaseButton**    | Simulates releasing a touchpad button.                                                                            |
-| **Click**            | Simulates a single click of the specified button.                                                                 |
-| **DoubleClick**      | Simulates a double click of the specified button.                                                                 |
-| **ClickLeft**        | Convenience method to simulate a single left click.                                                               |
-| **ClickRight**       | Convenience method to simulate a single right click.                                                              |
-| **DoubleClickLeft**  | Convenience method to simulate a double left click.                                                               |
-| **DoubleClickRight** | Convenience method to simulate a double right click.                                                             |
+| **PressButton**      | Simulates pressing a touchpad button.                                                                                                                                                                  |
+| **ReleaseButton**    | Simulates releasing a touchpad button.                                                                                                                                                                 |
+| **Click**            | Simulates a single click of the specified button.                                                                                                                                                      |
+| **DoubleClick**      | Simulates a double click of the specified button.                                                                                                                                                      |
+| **ClickLeft**        | Convenience method to simulate a single left click.                                                                                                                                                    |
+| **ClickRight**       | Convenience method to simulate a single right click.                                                                                                                                                   |
+| **DoubleClickLeft**  | Convenience method to simulate a double left click.                                                                                                                                                    |
+| **DoubleClickRight** | Convenience method to simulate a double right click.                                                                                                                                                   |
 
 
 #### **Touchpad Handling**

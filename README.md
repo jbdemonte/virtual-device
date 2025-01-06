@@ -73,7 +73,7 @@ To simplify common use cases, the package provides **helper classes** built on t
 
 This package provides pre-configured factory functions to create virtual devices that simulate specific devices. These functions simplify the creation of virtual devices by providing ready-made configurations for popular hardware such as Sony PS5, Nintendo Switch Pro controllers, and more.
 
-##### **Keyboard**
+##### **Keyboard** ([example](./docs/examples/keyboard.md))
 
 - **`NewGenericKeyboard`**  
   Creates a virtual generic keyboard.
@@ -81,7 +81,7 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewLogitechG510`**  
   Creates a virtual keyboard with the layout and features of a Logitech G510 gaming keyboard
 
-##### **Mouse**
+##### **Mouse** ([example](./docs/examples/mouse.md))
 
 - **`NewGenericMouse`**  
   Creates a virtual generic mouse with basic movement, scrolling, and button support.
@@ -89,12 +89,12 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewLogitechG402`**  
   Creates a virtual mouse with the layout and features of a Logitech G402 gaming mouse.
 
-##### **Touchpad**
+##### **Touchpad** ([example](./docs/examples/touchpad.md))
 
 - **`NewGenericTouchpad`**  
-  Creates a virtual generic touchpad with basic multitouch, button support, and absolute axis handling.
+  Creates a virtual generic touchpad with basic multitouch, button support, and absolute axis handling.  
 
-##### **Gamepads**
+##### **Gamepads** ([example](./docs/examples/gamepad.md))  
 
 - **`NewSonyPS4`**  
   Creates a virtual controller with the layout and behavior of a Sony PS4 DualShock controller.
@@ -128,7 +128,7 @@ This package provides pre-configured factory functions to create virtual devices
 
 ##### **[IMU](./docs/IMU.md)**
 
-- **`NewJoyConIMU`**  
+- **`NewJoyConIMU`**  ([example](./docs/examples/joyconIMU.md))  
   Creates a virtual controller with the layout and behavior of an Nintendo Switch JoyCon IMU.
 
 
