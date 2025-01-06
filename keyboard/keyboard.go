@@ -14,11 +14,14 @@ type VirtualKeyboard interface {
 
 	PressKey(key linux.Key)
 	ReleaseKey(key linux.Key)
+	TapKey(key linux.Key)
 	SetLed(led linux.Led, state bool)
+	SyncReport()
 }
 
 type VirtualKeyboardFactory interface {
 	WithDevice(device virtual_device.VirtualDevice) VirtualKeyboardFactory
+	WithTapDuration(duration time.Duration) VirtualKeyboardFactory
 	WithScanCode() VirtualKeyboardFactory
 	WithKeys(keys []linux.Key) VirtualKeyboardFactory
 	WithLEDs(leds []linux.Led) VirtualKeyboardFactory
@@ -28,20 +31,28 @@ type VirtualKeyboardFactory interface {
 }
 
 func NewVirtualKeyboardFactory() VirtualKeyboardFactory {
-	return &virtualKeyboardFactory{}
+	return &virtualKeyboardFactory{
+		tapDuration: -1,
+	}
 }
 
 type virtualKeyboardFactory struct {
-	device   virtual_device.VirtualDevice
-	scanCode bool
-	keys     []linux.Key
-	leds     []linux.Led
-	repeat   *Repeat
-	keymap   KeyMap
+	device      virtual_device.VirtualDevice
+	scanCode    bool
+	keys        []linux.Key
+	leds        []linux.Led
+	repeat      *Repeat
+	keymap      KeyMap
+	tapDuration time.Duration
 }
 
 func (f *virtualKeyboardFactory) WithDevice(device virtual_device.VirtualDevice) VirtualKeyboardFactory {
 	f.device = device
+	return f
+}
+
+func (f *virtualKeyboardFactory) WithTapDuration(duration time.Duration) VirtualKeyboardFactory {
+	f.tapDuration = duration
 	return f
 }
 
@@ -71,9 +82,16 @@ func (f *virtualKeyboardFactory) WithKeyMap(keymap KeyMap) VirtualKeyboardFactor
 }
 
 func (f *virtualKeyboardFactory) Create() VirtualKeyboard {
+
+	tapDuration := f.tapDuration
+	if tapDuration < 0 {
+		tapDuration = 20 * time.Millisecond
+	}
+
 	vk := &virtualKeyboard{
-		device: f.device,
-		keymap: f.keymap,
+		device:      f.device,
+		keymap:      f.keymap,
+		tapDuration: tapDuration,
 	}
 	if f.scanCode {
 		vk.device.WithScanCode()
@@ -87,8 +105,9 @@ func (f *virtualKeyboardFactory) Create() VirtualKeyboard {
 }
 
 type virtualKeyboard struct {
-	device virtual_device.VirtualDevice
-	keymap KeyMap
+	device      virtual_device.VirtualDevice
+	keymap      KeyMap
+	tapDuration time.Duration
 }
 
 func (vk *virtualKeyboard) Register() error {
@@ -107,8 +126,20 @@ func (vk *virtualKeyboard) ReleaseKey(key linux.Key) {
 	vk.device.ReleaseKey(key)
 }
 
+func (vk *virtualKeyboard) TapKey(key linux.Key) {
+	vk.device.PressKey(key)
+	vk.device.SyncReport()
+	time.Sleep(vk.tapDuration)
+	vk.device.ReleaseKey(key)
+	vk.device.SyncReport()
+}
+
 func (vk *virtualKeyboard) SetLed(led linux.Led, state bool) {
 	vk.device.SetLed(led, state)
+}
+
+func (vk *virtualKeyboard) SyncReport() {
+	vk.device.SyncReport()
 }
 
 func (vk *virtualKeyboard) Type(content string) {
@@ -128,7 +159,7 @@ func (vk *virtualKeyboard) Type(content string) {
 
 			vk.device.SyncReport()
 
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(vk.tapDuration)
 
 			vk.device.ReleaseKey(mapping.keyCode)
 
@@ -141,7 +172,7 @@ func (vk *virtualKeyboard) Type(content string) {
 
 			vk.device.SyncReport()
 
-			time.Sleep(30 * time.Millisecond)
+			time.Sleep(vk.tapDuration)
 		} else {
 			fmt.Printf("Warning: Character '%c' is not mapped\n", char)
 		}
