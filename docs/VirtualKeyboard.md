@@ -55,15 +55,15 @@ It supports method chaining for easy setup.
 
 #### **Methods**
 
-| **Action**       | **Description**                                                                   |
-|------------------|-----------------------------------------------------------------------------------|
-| **WithDevice**   | Attaches an existing `VirtualDevice` to the keyboard.                             |
-| **WithScanCode** | Enables raw scan code support for the keyboard.                                  |
-| **WithKeys**     | Configures the list of supported keys for the keyboard.                          |
-| **WithLEDs**     | Configures the LEDs supported by the keyboard.                                   |
-| **WithRepeat**   | Sets the repeat delay and period for held keys.                                  |
-| **WithKeyMap**   | Specifies a custom keymap to use with the keyboard.                              |
-| **Create**       | Creates an instance of `VirtualKeyboard` with the specified configuration.        |
+| **Action**           | **Description**                                                            |
+|----------------------|----------------------------------------------------------------------------|
+| **`WithDevice`**     | Attaches an existing `VirtualDevice` to the keyboard.                      |
+| **`WithKeys`**       | Configures the list of supported keys for the keyboard.                    |
+| **`WithLEDs`**       | Configures the LEDs supported by the keyboard.                             |
+| **`WithRepeat`**     | Sets the repeat delay and period for held keys.                            |
+| **`WithKeyMap`**     | Specifies a custom keymap to use with the keyboard.                        |
+| **`WithMiscEvents`** | Specifies the miscellaneous events (e.g., `linux.MSC_SCAN`).               |
+| **`Create`**         | Creates an instance of `VirtualKeyboard` with the specified configuration. |
 
 
 ---

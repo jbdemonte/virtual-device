@@ -16,7 +16,7 @@ func NewLogitechG510() VirtualKeyboard {
 				WithVersion(0x111).
 				WithName("Logitech G510 Gaming Keyboard"),
 		).
-		WithScanCode().
+		WithMiscEvents([]linux.MiscEvent{linux.MSC_SCAN}).
 		WithRepeat(250, 33).
 		WithLEDs(
 			[]linux.Led{

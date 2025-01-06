@@ -21,12 +21,12 @@ These methods allow you to configure the virtual device before registration.
 | **`WithName`**       | Sets the name of the virtual device.                                                                     |
 | **`WithKeys`**       | Specifies the keys supported by the device. (e.g. `[]linux.Key{linux.KEY_A, linux.KEY_B, linux.KEY_C}`). |
 | **`WithButtons`**    | Specifies the buttons supported by the device. (e.g. `[]linux.Button{linux.BTN_LEFT, linux.BTN_RIGHT}`). |
-| **`WithScanCode`**   | Enables scan code support.                                                                               |
 | **`WithAbsAxes`**    | Configures the absolute axes for the device.                                                             |
 | **`WithRelAxes`**    | Configures the relative axes for the device.                                                             |
 | **`WithRepeat`**     | Configures key repeat delay and period.                                                                  |
 | **`WithLEDs`**       | Specifies the LEDs supported by the device. (e.g. `[]linux.Led{linux.LED_NUML, linux.LED_CAPSL`).        |
 | **`WithProperties`** | Sets device-specific properties (e.g., `linux.INPUT_PROP_BUTTONPAD`).                                    |
+| **`WithMiscEvents`** | Specifies the miscellaneous events (e.g., `linux.MSC_SCAN`).                                             |
 
 
 ---
@@ -56,8 +56,8 @@ These methods send or manipulate input events.
 | **`ReleaseButton`**     | Simulates a button release event.                               |
 | **`SendAbsoluteEvent`** | Sends an absolute axis event with the specified axis and value. |
 | **`SendRelativeEvent`** | Sends a relative axis event with the specified axis and value.  |
-| **`SendMiscEvent`**     | Sends a miscellaneous event (`linux.MSC_XXX`).                  |
 | **`SetLed`**            | Toggles the state of an LED on the virtual device.              |
+| **`SendMiscEvent`**     | Sends a miscellaneous event (e.g., `linux.MSC_SCAN`).           |
 
 
 ## **Usage**

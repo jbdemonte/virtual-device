@@ -34,7 +34,7 @@ func NewLogitechG402() VirtualMouse {
 					linux.Button(286), // ?
 					linux.Button(287), // ?
 				}).
-				WithScanCode().
+				WithMiscEvents([]linux.MiscEvent{linux.MSC_SCAN}).
 				WithRelAxes([]linux.RelativeAxis{
 					linux.REL_X,
 					linux.REL_Y,

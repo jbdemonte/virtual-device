@@ -21,7 +21,7 @@ func NewGenericKeyboard() VirtualKeyboard {
 				WithVersion(0x01).
 				WithName("Generic Keyboard"),
 		).
-		WithScanCode().
+		WithMiscEvents([]linux.MiscEvent{linux.MSC_SCAN}).
 		WithRepeat(250, 33).
 		WithLEDs(
 			[]linux.Led{

@@ -16,15 +16,16 @@ type VirtualKeyboard interface {
 	ReleaseKey(key linux.Key)
 	TapKey(key linux.Key)
 	SetLed(led linux.Led, state bool)
+	SendMiscEvent(event linux.MiscEvent, value int32)
 	SyncReport()
 }
 
 type VirtualKeyboardFactory interface {
 	WithDevice(device virtual_device.VirtualDevice) VirtualKeyboardFactory
 	WithTapDuration(duration time.Duration) VirtualKeyboardFactory
-	WithScanCode() VirtualKeyboardFactory
 	WithKeys(keys []linux.Key) VirtualKeyboardFactory
 	WithLEDs(leds []linux.Led) VirtualKeyboardFactory
+	WithMiscEvents(events []linux.MiscEvent) VirtualKeyboardFactory
 	WithRepeat(delay, period int32) VirtualKeyboardFactory
 	WithKeyMap(keymap KeyMap) VirtualKeyboardFactory
 	Create() VirtualKeyboard
@@ -38,9 +39,9 @@ func NewVirtualKeyboardFactory() VirtualKeyboardFactory {
 
 type virtualKeyboardFactory struct {
 	device      virtual_device.VirtualDevice
-	scanCode    bool
 	keys        []linux.Key
 	leds        []linux.Led
+	miscEvents  []linux.MiscEvent
 	repeat      *Repeat
 	keymap      KeyMap
 	tapDuration time.Duration
@@ -56,11 +57,6 @@ func (f *virtualKeyboardFactory) WithTapDuration(duration time.Duration) Virtual
 	return f
 }
 
-func (f *virtualKeyboardFactory) WithScanCode() VirtualKeyboardFactory {
-	f.scanCode = true
-	return f
-}
-
 func (f *virtualKeyboardFactory) WithKeys(keys []linux.Key) VirtualKeyboardFactory {
 	f.keys = keys
 	return f
@@ -68,6 +64,11 @@ func (f *virtualKeyboardFactory) WithKeys(keys []linux.Key) VirtualKeyboardFacto
 
 func (f *virtualKeyboardFactory) WithLEDs(leds []linux.Led) VirtualKeyboardFactory {
 	f.leds = leds
+	return f
+}
+
+func (f *virtualKeyboardFactory) WithMiscEvents(events []linux.MiscEvent) VirtualKeyboardFactory {
+	f.miscEvents = events
 	return f
 }
 
@@ -82,7 +83,6 @@ func (f *virtualKeyboardFactory) WithKeyMap(keymap KeyMap) VirtualKeyboardFactor
 }
 
 func (f *virtualKeyboardFactory) Create() VirtualKeyboard {
-
 	tapDuration := f.tapDuration
 	if tapDuration < 0 {
 		tapDuration = 20 * time.Millisecond
@@ -93,14 +93,14 @@ func (f *virtualKeyboardFactory) Create() VirtualKeyboard {
 		keymap:      f.keymap,
 		tapDuration: tapDuration,
 	}
-	if f.scanCode {
-		vk.device.WithScanCode()
-	}
 	if f.repeat != nil {
 		vk.device.WithRepeat(f.repeat.delay, f.repeat.period)
 	}
 	vk.device.WithKeys(f.keys)
 	vk.device.WithLEDs(f.leds)
+	if len(f.miscEvents) > 0 {
+		vk.device.WithMiscEvents(f.miscEvents)
+	}
 	return vk
 }
 
@@ -136,6 +136,10 @@ func (vk *virtualKeyboard) TapKey(key linux.Key) {
 
 func (vk *virtualKeyboard) SetLed(led linux.Led, state bool) {
 	vk.device.SetLed(led, state)
+}
+
+func (vk *virtualKeyboard) SendMiscEvent(event linux.MiscEvent, value int32) {
+	vk.device.SendMiscEvent(event, value)
 }
 
 func (vk *virtualKeyboard) SyncReport() {

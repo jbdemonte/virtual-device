@@ -24,7 +24,6 @@ type VirtualDevice interface {
 	WithName(name string) VirtualDevice
 	WithKeys(keys []linux.Key) VirtualDevice
 	WithButtons(buttons []linux.Button) VirtualDevice
-	WithScanCode() VirtualDevice
 	WithAbsAxes(absoluteAxes []AbsAxis) VirtualDevice
 	WithRelAxes(relativeAxes []linux.RelativeAxis) VirtualDevice
 	WithRepeat(delay, period int32) VirtualDevice
@@ -107,11 +106,6 @@ func (vd *virtualDevice) WithButtons(buttons []linux.Button) VirtualDevice {
 	return vd
 }
 
-func (vd *virtualDevice) WithScanCode() VirtualDevice {
-	vd.config.scanCode = true
-	return vd
-}
-
 func (vd *virtualDevice) WithAbsAxes(absoluteAxes []AbsAxis) VirtualDevice {
 	vd.config.absoluteAxes = absoluteAxes
 	return vd
@@ -157,7 +151,6 @@ func (vd *virtualDevice) Register() error {
 
 	steps := []func() error{
 		vd.registerKeys,
-		vd.registerScanCode,
 		vd.registerAxes,
 		vd.registerProperties,
 		vd.registerMiscEvents,
@@ -318,22 +311,6 @@ func (vd *virtualDevice) registerKeys() error {
 		}
 	}
 
-	return nil
-}
-
-func (vd *virtualDevice) registerScanCode() error {
-	if !vd.config.scanCode {
-		return nil
-	}
-	err := ioctl(vd.fd, linux.UI_SET_EVBIT, uintptr(linux.EV_MSC))
-	if err != nil {
-		return fmt.Errorf("failed to set UI_SET_EVBIT, EV_MSC: %v", err)
-	}
-
-	err = ioctl(vd.fd, linux.UI_SET_MSCBIT, uintptr(linux.MSC_SCAN))
-	if err != nil {
-		return fmt.Errorf("failed to register MSC_SCAN: %v", err)
-	}
 	return nil
 }
 

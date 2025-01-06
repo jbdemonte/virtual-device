@@ -94,6 +94,8 @@ func (vg *virtualGamepad) init() {
 	absoluteAxes := make([]virtual_device.AbsAxis, 0)
 	hatEvents := make([]HatEvent, 0)
 
+	withScanCode := false
+
 	var init func(event InputEvent)
 
 	init = func(event InputEvent) {
@@ -107,7 +109,7 @@ func (vg *virtualGamepad) init() {
 		case linux.Key:
 			keys = append(keys, e)
 		case MSCScanCode:
-			vg.device.WithScanCode()
+			withScanCode = true
 		case HatEvent:
 			hatEvents = append(hatEvents, e)
 		case virtual_device.AbsAxis:
@@ -144,6 +146,10 @@ func (vg *virtualGamepad) init() {
 	vg.device.WithButtons(buttons)
 	vg.device.WithKeys(keys)
 	vg.device.WithAbsAxes(absoluteAxes)
+
+	if withScanCode {
+		vg.device.WithMiscEvents([]linux.MiscEvent{linux.MSC_SCAN})
+	}
 }
 
 func (vg *virtualGamepad) Press(button Button) {
