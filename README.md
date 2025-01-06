@@ -94,7 +94,7 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewGenericTouchpad`**  
   Creates a virtual generic touchpad with basic multitouch, button support, and absolute axis handling.  
 
-##### **Gamepads** ([example](./docs/examples/gamepad.md))  
+##### **Gamepad** ([example](./docs/examples/gamepad.md))  
 
 - **`NewSonyPS4`**  
   Creates a virtual controller with the layout and behavior of a Sony PS4 DualShock controller.
@@ -126,7 +126,7 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewSN30Pro`**  
   Creates a virtual controller with the layout and behavior of an 8BitDo SN30 Pro controller.
 
-##### **[IMU](./docs/IMU.md)**
+##### **[Inertial Measurement Unit (IMU)](./docs/IMU.md)**
 
 - **`NewJoyConIMU`**  ([example](./docs/examples/joyconIMU.md))  
   Creates a virtual controller with the layout and behavior of an Nintendo Switch JoyCon IMU.
