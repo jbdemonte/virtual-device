@@ -1,7 +1,21 @@
+
+![Go Version](https://img.shields.io/github/go-mod/go-version/jbdemonte/virtual-device?logo=go)
+![Platform](https://img.shields.io/badge/platform-linux-blue?logo=linux&logoColor=white)
+[![GitHub release](https://img.shields.io/github/v/release/jbdemonte/virtual-device.svg?logo=github)](https://github.com/jbdemonte/virtual-device/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/jbdemonte/virtual-device.svg)](https://pkg.go.dev/github.com/jbdemonte/virtual-device)
+
+[![License](https://img.shields.io/github/license/jbdemonte/virtual-device.svg?logo=open-source-initiative)](LICENSE)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?logo=github)](https://github.com/jbdemonte/virtual-device/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?logo=git)](https://github.com/jbdemonte/virtual-device/pulls)
+
+
+
+----
+
 # **Virtual Device**
 
-This package provides pure go functions to create virtual devices on Linux using [input](https://www.kernel.org/doc/html/latest/input/index.html) and [uinput](https://www.kernel.org/doc/html/latest/input/uinput.html) through [ioctl](https://en.wikipedia.org/wiki/Ioctl).
-
+This package provides pure go functions to create virtual devices on Linux 
+using [input](https://www.kernel.org/doc/html/latest/input/index.html) and [uinput](https://www.kernel.org/doc/html/latest/input/uinput.html) through [ioctl](https://en.wikipedia.org/wiki/Ioctl).
 ## **Installation**
 
 ```sh
@@ -167,3 +181,13 @@ linux.LED_NUML  // Represents the Num Lock LED
 
 ## **Credits**
 Package freely inspired by [kenshaw/evdev](https://github.com/kenshaw/evdev), [bendahl/uinput](https://github.com/bendahl/uinput) and some others.
+
+
+----
+
+![Works on my machine](https://img.shields.io/badge/works-on%20my%20machine-green.svg?logo=linux&logoColor=white)
+![Made for Players](https://img.shields.io/badge/made%20for-🕹️%20players%20🎮-orange?logo=gamepad&logoColor=white)
+![Powered by Coffee](https://img.shields.io/badge/powered%20by-coffee-yellow.svg?logo=buymeacoffee&logoColor=white)
+![This is Fine](https://img.shields.io/badge/🔥%20this%20is-fine-red)
+![Unicorn Code](https://img.shields.io/badge/🦄%20100%25-unicorn%20code-pink)
+![YOLO Driven](https://img.shields.io/badge/💀%20YOLO-driven%20development-lightgrey)
