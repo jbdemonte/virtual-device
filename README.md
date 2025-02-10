@@ -140,6 +140,9 @@ This package provides pre-configured factory functions to create virtual devices
 - **`NewSN30Pro`**  
   Creates a virtual controller with the layout and behavior of an 8BitDo SN30 Pro controller.
 
+- **`NewSaitekP2600`**  
+  Creates a virtual controller with the layout and behavior of an Saitek  P2600 controller.
+
 ##### **[Inertial Measurement Unit (IMU)](./docs/IMU.md)**
 
 - **`NewJoyConIMU`**  ([example](./docs/examples/joyconIMU.md))  
