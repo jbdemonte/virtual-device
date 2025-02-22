@@ -41,6 +41,19 @@ Example on Debian based OS:
 sudo usermod -aG input $USER
 ```
 
+## **Uinput Issues**
+
+You may need to load the uinput module into the kernel if it is not already loaded.
+
+If you want to check if uinput is loaded run
+```sh
+lsmod | grep uinput
+```
+If the command shows nothing you can load uinput running the following
+```sh
+sudo modprobe uinput
+```
+
 ## **Overview**
 
 The **`virtual-device`** package provides a flexible framework for creating and managing virtual input devices on Linux using the uinput interface. It is designed to simplify the process of creating virtual devices like keyboards, mice, and gamepads, while offering a clean and extensible API.
