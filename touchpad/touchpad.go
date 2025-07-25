@@ -1,9 +1,10 @@
 package touchpad
 
 import (
+	"time"
+
 	virtual_device "github.com/jbdemonte/virtual-device"
 	"github.com/jbdemonte/virtual-device/linux"
-	"time"
 )
 
 // https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
@@ -33,6 +34,8 @@ type VirtualTouchpad interface {
 
 	DoubleClickLeft()
 	DoubleClickRight()
+
+	Send(evType, code uint16, value int32)
 }
 
 type VirtualTouchpadFactory interface {
@@ -293,4 +296,8 @@ func (vt *virtualTouchpad) DoubleClickLeft() {
 
 func (vt *virtualTouchpad) DoubleClickRight() {
 	vt.DoubleClick(linux.BTN_RIGHT)
+}
+
+func (vt *virtualTouchpad) Send(evType, code uint16, value int32) {
+	vt.device.Send(evType, code, value)
 }

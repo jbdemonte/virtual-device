@@ -24,6 +24,7 @@ The `VirtualGamepad` interface defines the core functionalities of a virtual gam
 | **MoveRightStick**  | Moves the Right analog stick to the specified X and Y coordinates (values between -1 and 1). |
 | **MoveRightStickX** | Moves the right analog stick on the X-axis.                                                  |
 | **MoveRightStickY** | Moves the right analog stick on the Y-axis.                                                  |
+| **Send**            | Sends a raw input event of the specified type, code, and value.                              |
 
 #### **Standardized Gamepad Input Handling**
 
@@ -196,6 +197,8 @@ func main() {
     g.MoveLeftStick(0.5, -0.5)
     
     g.MoveRightStick(-1.0, 1.0)
+
+    g.Send(uint16(linux.EV_KEY), uint16(gamepad.ButtonA), 1)
 	
 }
 ```

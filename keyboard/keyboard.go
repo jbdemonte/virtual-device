@@ -2,9 +2,10 @@ package keyboard
 
 import (
 	"fmt"
+	"time"
+
 	virtual_device "github.com/jbdemonte/virtual-device"
 	"github.com/jbdemonte/virtual-device/linux"
-	"time"
 )
 
 type VirtualKeyboard interface {
@@ -18,6 +19,8 @@ type VirtualKeyboard interface {
 	SetLed(led linux.Led, state bool)
 	SendMiscEvent(event linux.MiscEvent, value int32)
 	SyncReport()
+
+	Send(evType, code uint16, value int32)
 }
 
 type VirtualKeyboardFactory interface {
@@ -181,4 +184,8 @@ func (vk *virtualKeyboard) Type(content string) {
 			fmt.Printf("Warning: Character '%c' is not mapped\n", char)
 		}
 	}
+}
+
+func (vk *virtualKeyboard) Send(evType, code uint16, value int32) {
+	vk.device.Send(evType, code, value)
 }
