@@ -1,9 +1,10 @@
 package mouse
 
 import (
+	"time"
+
 	virtual_device "github.com/jbdemonte/virtual-device"
 	"github.com/jbdemonte/virtual-device/linux"
-	"time"
 )
 
 type VirtualMouse interface {
@@ -35,6 +36,8 @@ type VirtualMouse interface {
 	DoubleClickLeft()
 	DoubleClickRight()
 	DoubleClickMiddle()
+
+	Send(evType, code uint16, value int32)
 }
 
 type VirtualMouseFactory interface {
@@ -213,4 +216,8 @@ func (vm *virtualMouse) DoubleClickRight() {
 
 func (vm *virtualMouse) DoubleClickMiddle() {
 	vm.DoubleClick(linux.BTN_MIDDLE)
+}
+
+func (vm *virtualMouse) Send(evType, code uint16, value int32) {
+	vm.device.Send(evType, code, value)
 }

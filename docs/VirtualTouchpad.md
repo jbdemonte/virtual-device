@@ -33,6 +33,7 @@ _Pressure is between 0 and 1_
 | **ClickRight**       | Convenience method to simulate a single right click.                                                                                                                                                   |
 | **DoubleClickLeft**  | Convenience method to simulate a double left click.                                                                                                                                                    |
 | **DoubleClickRight** | Convenience method to simulate a double right click.                                                                                                                                                   |
+| **Send**             | Sends a raw input event of the specified type, code, and value.                                                                                                                                        |
 
 
 #### **Touchpad Handling**

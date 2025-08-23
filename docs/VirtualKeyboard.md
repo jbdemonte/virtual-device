@@ -19,6 +19,7 @@ The `VirtualKeyboard` interface defines the core functionalities of a virtual ke
 | **ReleaseKey** | Simulates releasing a specific key.                                                  |
 | **Type**       | Simulates typing a string of characters using the virtual keyboard.                  |
 | **SetLed**     | Controls the state of a keyboard LED (e.g., Caps Lock or Num Lock).                  |
+| **Send**       | Sends a raw input event of the specified type, code, and value.                      |
 
 
 ####  **Keyboard Layout Detection in `Type`**
