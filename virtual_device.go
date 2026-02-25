@@ -399,7 +399,7 @@ func (vd *virtualDevice) pull() {
 		for event := range vd.queue {
 			err := vd.writeEvent(event)
 			if err != nil {
-				fmt.Printf("failed to write event: %v", err)
+				fmt.Fprintf(os.Stderr, "failed to write event: %v\n", err)
 			}
 		}
 	}()
