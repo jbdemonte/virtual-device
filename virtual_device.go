@@ -325,7 +325,7 @@ func (vd *virtualDevice) registerAxes() error {
 		for _, event := range vd.config.absoluteAxes {
 			err = ioctl(vd.fd, linux.UI_SET_ABSBIT, uintptr(event.Axis))
 			if err != nil {
-				return fmt.Errorf("failed to register absolute axe 0x%x: %v", event.Axis, err)
+				return fmt.Errorf("failed to register absolute axis 0x%x: %v", event.Axis, err)
 			}
 		}
 	}
@@ -338,7 +338,7 @@ func (vd *virtualDevice) registerAxes() error {
 		for _, axis := range vd.config.relativeAxes {
 			err = ioctl(vd.fd, linux.UI_SET_RELBIT, uintptr(axis))
 			if err != nil {
-				return fmt.Errorf("failed to register relative axe 0x%x: %v", axis, err)
+				return fmt.Errorf("failed to register relative axis 0x%x: %v", axis, err)
 			}
 		}
 	}
