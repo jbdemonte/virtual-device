@@ -939,7 +939,7 @@ type SwitchEvent uint16
 const (
 	SW_LID                         SwitchEvent = 0x00 /* set = lid shut */
 	SW_TABLET_MODE                 SwitchEvent = 0x01 /* set = tablet mode */
-	SW_HEADPHONE_INSERTSwitchEvent             = 0x02 /* set = inserted */
+	SW_HEADPHONE_INSERT            SwitchEvent = 0x02 /* set = inserted */
 	SW_RFKILL_ALL                  SwitchEvent = 0x03 /* rfkill master switch, type "any"
 	set = radio enabled */
 	SW_RADIO                        SwitchEvent = SW_RFKILL_ALL /* deprecated */
@@ -947,10 +947,10 @@ const (
 	SW_DOCK                         SwitchEvent = 0x05          /* set = plugged into dock */
 	SW_LINEOUT_INSERT               SwitchEvent = 0x06          /* set = inserted */
 	SW_JACK_PHYSICAL_INSERT         SwitchEvent = 0x07          /* set = mechanical switch set */
-	SW_VIDEOOUT_INSERTSwitchEvent               = 0x08          /* set = inserted */
-	SW_CAMERA_LENS_COVERSwitchEvent             = 0x09          /* set = lens covered */
+	SW_VIDEOOUT_INSERT              SwitchEvent = 0x08          /* set = inserted */
+	SW_CAMERA_LENS_COVER            SwitchEvent = 0x09          /* set = lens covered */
 	SW_KEYPAD_SLIDE                 SwitchEvent = 0x0a          /* set = keypad slide out */
-	SW_FRONT_PROXIMITYSwitchEvent               = 0x0b          /* set = front proximity sensor active */
+	SW_FRONT_PROXIMITY              SwitchEvent = 0x0b          /* set = front proximity sensor active */
 	SW_ROTATE_LOCK                  SwitchEvent = 0x0c          /* set = rotate locked/disabled */
 	SW_LINEIN_INSERT                SwitchEvent = 0x0d          /* set = inserted */
 	SW_MUTE_DEVICE                  SwitchEvent = 0x0e          /* set = device disabled */
