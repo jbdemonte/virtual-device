@@ -31,7 +31,7 @@ The `VirtualMouse` interface defines the core functionalities of a virtual mouse
 | **ClickLeft**        | Convenience method to simulate a single left click.                                              |
 | **ClickRight**       | Convenience method to simulate a single right click.                                             |
 | **ClickMiddle**      | Convenience method to simulate a single middle click.                                            |
-| **DoubleClickRight** | Convenience method to simulate a double left click.                                              |
+| **DoubleClickLeft**  | Convenience method to simulate a double left click.                                              |
 | **DoubleClickRight** | Convenience method to simulate a double right click.                                             |
 | **DoubleClickMiddle**| Convenience method to simulate a double middle click.                                            |
 | **Send**             | Sends a raw input event of the specified type, code, and value.                                  |
