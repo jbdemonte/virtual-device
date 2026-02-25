@@ -2,6 +2,7 @@ package gamepad
 
 // https://www.kernel.org/doc/Documentation/input/gamepad.txt
 
+// Button identifies a logical gamepad button.
 type Button int
 
 const (

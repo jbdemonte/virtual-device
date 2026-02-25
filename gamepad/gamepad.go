@@ -7,6 +7,7 @@ import (
 	"github.com/jbdemonte/virtual-device/linux"
 )
 
+// VirtualGamepad is a high-level virtual gamepad input device.
 type VirtualGamepad interface {
 	Register() error
 	Unregister() error
@@ -27,6 +28,7 @@ type VirtualGamepad interface {
 	EventPath() string
 }
 
+// VirtualGamepadFactory configures and creates VirtualGamepad instances.
 type VirtualGamepadFactory interface {
 	WithDevice(device virtual_device.VirtualDevice) VirtualGamepadFactory
 	WithDigital(mapping MappingDigital) VirtualGamepadFactory
@@ -42,6 +44,7 @@ type virtualGamepadFactory struct {
 	rightStick *MappingStick
 }
 
+// NewVirtualGamepadFactory returns a new factory for building virtual gamepads.
 func NewVirtualGamepadFactory() VirtualGamepadFactory {
 	return &virtualGamepadFactory{}
 }

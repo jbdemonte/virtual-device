@@ -29,7 +29,7 @@ const (
 
 const UINPUT_MAX_NAME_SIZE = 80
 
-// uinput_user_dev from https://github.com/torvalds/linux/blob/master/include/uapi/linux/uinput.h#L223
+// UInputUserDev is the uinput_user_dev struct from linux/uinput.h.
 type UInputUserDev struct {
 	Name       [UINPUT_MAX_NAME_SIZE]byte
 	ID         InputID
@@ -40,13 +40,14 @@ type UInputUserDev struct {
 	AbsFlat    [ABS_CNT]int32
 }
 
+// UInputSetup is the uinput_setup struct used with UI_DEV_SETUP ioctl.
 type UInputSetup struct {
 	ID           InputID
 	Name         [80]byte
 	FFEffectsMax uint32
 }
 
-// https://github.com/torvalds/linux/blob/master/include/uapi/linux/uinput.h#L161
+// UI_GET_SYSNAME returns the ioctl request code to get the sysfs device name.
 func UI_GET_SYSNAME(len int) uintptr {
 	return _IOC(_IOC_READ, UINPUT_IOCTL_BASE, 44, uintptr(len))
 }

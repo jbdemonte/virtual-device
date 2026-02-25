@@ -2,6 +2,7 @@ package utils
 
 import "sync/atomic"
 
+// AtomicBool is a thread-safe boolean backed by atomic int32 operations.
 type AtomicBool struct {
 	value int32 // Uses int32 because atomic operations do not directly support booleans
 }

@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// AbsAxis describes an absolute axis with its range and properties.
 type AbsAxis struct {
 	Axis             linux.AbsoluteAxis
 	Value            int32
@@ -17,6 +18,7 @@ type AbsAxis struct {
 	IsUnidirectional bool
 }
 
+// Repeat holds the key repeat delay and period in milliseconds.
 type Repeat struct {
 	delay  int32
 	period int32
@@ -49,6 +51,7 @@ func (a AbsAxis) Denormalize(value float32) int32 {
 	return a.denormalizeBiDirectional(value)
 }
 
+// Config holds the input capabilities for a virtual device.
 type Config struct {
 	keys         []linux.Key
 	buttons      []linux.Button

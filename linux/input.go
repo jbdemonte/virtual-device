@@ -194,6 +194,7 @@ const (
 	ID_VERSION = 3
 )
 
+// BusType identifies the bus a device is connected to.
 type BusType uint16
 
 const (
@@ -223,6 +224,7 @@ const (
 	BUS_AMD_SFH     BusType = 0x20
 )
 
+// MtToolType identifies the type of tool used in a multitouch contact.
 type MtToolType uint16
 
 const (
@@ -234,6 +236,7 @@ const (
 	MT_TOOL_MAX    MtToolType = 0x0f
 )
 
+// FFStatusType represents the playback status of a force feedback effect.
 type FFStatusType uint16
 
 const (
@@ -316,6 +319,7 @@ type FFEffect struct {
 	U         [24]byte
 }
 
+// FFEffectType identifies the type of a force feedback effect.
 type FFEffectType uint16
 
 const (
@@ -333,6 +337,7 @@ const (
 	FF_EFFECT_MAX FFEffectType = FF_RAMP
 )
 
+// FFPeriodicEffectType identifies the waveform of a periodic force feedback effect.
 type FFPeriodicEffectType uint16
 
 const (

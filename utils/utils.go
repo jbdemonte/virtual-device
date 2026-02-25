@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// WaitForEventFile polls until the given event file exists or the timeout elapses.
 func WaitForEventFile(eventPath string, timeout time.Duration) error {
 	start := time.Now()
 	for {

@@ -7,6 +7,7 @@ import (
 	"github.com/jbdemonte/virtual-device/linux"
 )
 
+// VirtualMouse is a high-level virtual mouse input device.
 type VirtualMouse interface {
 	Register() error
 	Unregister() error
@@ -42,6 +43,7 @@ type VirtualMouse interface {
 	EventPath() string
 }
 
+// VirtualMouseFactory configures and creates VirtualMouse instances.
 type VirtualMouseFactory interface {
 	WithDevice(device virtual_device.VirtualDevice) VirtualMouseFactory
 	WithClickDelay(delay int) VirtualMouseFactory
@@ -51,6 +53,7 @@ type VirtualMouseFactory interface {
 	Create() VirtualMouse
 }
 
+// NewVirtualMouseFactory returns a new factory for building virtual mice.
 func NewVirtualMouseFactory() VirtualMouseFactory {
 	return &virtualMouseFactory{
 		clickDelay:       -1,

@@ -8,6 +8,7 @@ import (
 	"github.com/jbdemonte/virtual-device/linux"
 )
 
+// VirtualKeyboard is a high-level virtual keyboard input device.
 type VirtualKeyboard interface {
 	Register() error
 	Type(content string)
@@ -25,6 +26,7 @@ type VirtualKeyboard interface {
 	EventPath() string
 }
 
+// VirtualKeyboardFactory configures and creates VirtualKeyboard instances.
 type VirtualKeyboardFactory interface {
 	WithDevice(device virtual_device.VirtualDevice) VirtualKeyboardFactory
 	WithTapDuration(duration time.Duration) VirtualKeyboardFactory
@@ -36,6 +38,7 @@ type VirtualKeyboardFactory interface {
 	Create() VirtualKeyboard
 }
 
+// NewVirtualKeyboardFactory returns a new factory for building virtual keyboards.
 func NewVirtualKeyboardFactory() VirtualKeyboardFactory {
 	return &virtualKeyboardFactory{
 		tapDuration: -1,

@@ -13,6 +13,7 @@ import (
 	"unsafe"
 )
 
+// VirtualDevice represents a Linux uinput virtual input device.
 type VirtualDevice interface {
 	WithPath(path string) VirtualDevice
 	WithMode(mode os.FileMode) VirtualDevice
@@ -49,6 +50,7 @@ type VirtualDevice interface {
 	EventPath() string
 }
 
+// NewVirtualDevice creates a new VirtualDevice with default settings.
 func NewVirtualDevice() VirtualDevice {
 	return &virtualDevice{
 		path:         "/dev/uinput",

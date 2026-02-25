@@ -8,12 +8,14 @@ import (
 	"github.com/jbdemonte/virtual-device/linux"
 )
 
+// Event records a single input event sent to a MockDevice.
 type Event struct {
 	EvType uint16
 	Code   uint16
 	Value  int32
 }
 
+// MockDevice is an in-memory VirtualDevice implementation for testing.
 type MockDevice struct {
 	mu     sync.Mutex
 	events []Event
@@ -37,6 +39,7 @@ type MockDevice struct {
 	MiscEvents   []linux.MiscEvent
 }
 
+// NewMockDevice returns a new MockDevice ready for use in tests.
 func NewMockDevice() *MockDevice {
 	return &MockDevice{}
 }

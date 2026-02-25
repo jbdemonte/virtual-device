@@ -2,8 +2,13 @@ package sdl
 
 // based on https://github.com/libsdl-org/SDL/blob/release-2.30.x/src/joystick/usb_ids.h
 
+// Vendor is a USB vendor ID.
 type Vendor = uint16
+
+// Product is a USB product ID.
 type Product = uint16
+
+// Usage is a USB HID usage code.
 type Usage = uint16
 
 const (

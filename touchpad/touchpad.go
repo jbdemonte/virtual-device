@@ -9,6 +9,7 @@ import (
 
 // https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
 
+// TouchSlot represents a single touch contact point with position and pressure.
 type TouchSlot struct {
 	Slot     int
 	X        float32
@@ -16,6 +17,7 @@ type TouchSlot struct {
 	Pressure float32
 }
 
+// VirtualTouchpad is a high-level virtual touchpad input device.
 type VirtualTouchpad interface {
 	Register() error
 	Unregister() error
@@ -40,6 +42,7 @@ type VirtualTouchpad interface {
 	EventPath() string
 }
 
+// VirtualTouchpadFactory configures and creates VirtualTouchpad instances.
 type VirtualTouchpadFactory interface {
 	WithDevice(device virtual_device.VirtualDevice) VirtualTouchpadFactory
 	WithClickDelay(delay int) VirtualTouchpadFactory
@@ -51,6 +54,7 @@ type VirtualTouchpadFactory interface {
 	Create() VirtualTouchpad
 }
 
+// NewVirtualTouchpadFactory returns a new factory for building virtual touchpads.
 func NewVirtualTouchpadFactory() VirtualTouchpadFactory {
 	return &virtualTouchpadFactory{
 		clickDelay:       -1,

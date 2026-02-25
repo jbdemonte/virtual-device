@@ -6,6 +6,7 @@ import (
 	"github.com/jbdemonte/virtual-device/sdl"
 )
 
+// NewJoyConIMU creates a virtual IMU device emulating a Nintendo Joy-Con accelerometer and gyroscope.
 func NewJoyConIMU(isLeft bool) virtual_device.VirtualDevice {
 	name := "Joy-Con (R) (IMU)"
 	product := sdl.USB_PRODUCT_NINTENDO_SWITCH_JOYCON_RIGHT

@@ -6,6 +6,7 @@ package linux
  * Device properties and quirks
  */
 
+// InputProp represents a device property or quirk.
 type InputProp uint16
 
 const (
@@ -25,6 +26,7 @@ const (
  * Event types
  */
 
+// EventType identifies the category of an input event.
 type EventType uint16
 
 const (
@@ -48,6 +50,7 @@ const (
  * Synchronization events.
  */
 
+// SyncEvent represents a synchronization event type.
 type SyncEvent uint16
 
 // Synchronization event values are undefined. Their usage is defined only by
@@ -89,7 +92,10 @@ const (
  * SC - System Control
  */
 
+// Key represents a keyboard key code.
 type Key uint16
+
+// Button represents a button code (mouse, gamepad, etc.).
 type Button uint16
 
 const (
@@ -837,6 +843,7 @@ const (
  * Relative axes
  */
 
+// RelativeAxis represents a relative axis code (e.g. mouse movement).
 type RelativeAxis uint16
 
 const (
@@ -868,6 +875,7 @@ const (
  * Absolute axes
  */
 
+// AbsoluteAxis represents an absolute axis code (e.g. joystick position).
 type AbsoluteAxis uint16
 
 const (
@@ -934,6 +942,7 @@ const (
  * Switch events
  */
 
+// SwitchEvent represents a binary switch event code.
 type SwitchEvent uint16
 
 const (
@@ -964,6 +973,7 @@ const (
  * Misc events
  */
 
+// MiscEvent represents a miscellaneous input event code.
 type MiscEvent uint16
 
 const (
@@ -981,6 +991,7 @@ const (
  * LEDs
  */
 
+// Led represents an LED indicator code.
 type Led uint16
 
 const (
@@ -1003,6 +1014,7 @@ const (
  * Autorepeat values
  */
 
+// AutoRepeat represents a key autorepeat parameter code.
 type AutoRepeat uint16
 
 const (
@@ -1016,6 +1028,7 @@ const (
  * Sounds
  */
 
+// Sound represents a sound event code.
 type Sound uint16
 
 const (
