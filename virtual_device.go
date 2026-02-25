@@ -405,8 +405,8 @@ func (vd *virtualDevice) pull() {
 	}()
 
 	if vd.config.repeat != nil {
-		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_DELAY), vd.config.repeat.delay)
-		vd.Send(uint16(linux.EV_MSC), uint16(linux.REP_PERIOD), vd.config.repeat.period)
+		vd.Send(uint16(linux.EV_REP), uint16(linux.REP_DELAY), vd.config.repeat.delay)
+		vd.Send(uint16(linux.EV_REP), uint16(linux.REP_PERIOD), vd.config.repeat.period)
 		vd.SyncReport()
 	}
 }
