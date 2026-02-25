@@ -238,7 +238,7 @@ func (vd *virtualDevice) createDevice() (err error) {
 		return fmt.Errorf("fetchEventPath: %v", err)
 	}
 
-	err = utils.WaitForEventFile(vd.eventPath, 500*time.Millisecond)
+	err = utils.WaitForEventFile(vd.eventPath, 2*time.Second)
 	if err != nil {
 		return fmt.Errorf("WaitForEventFile: %v", err)
 	}
