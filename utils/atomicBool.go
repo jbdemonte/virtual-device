@@ -3,7 +3,7 @@ package utils
 import "sync/atomic"
 
 type AtomicBool struct {
-	value int32 // Utilise int32 car les opérations atomiques ne supportent pas directement les booléens
+	value int32 // Uses int32 because atomic operations do not directly support booleans
 }
 
 func (ab *AtomicBool) Set(value bool) {
