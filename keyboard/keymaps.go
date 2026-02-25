@@ -110,7 +110,7 @@ var azertyKeyMap = KeyMap{
 	':': {linux.KEY_DOT, false, false}, '/': {linux.KEY_DOT, true, false},
 	'!': {linux.KEY_SLASH, false, false}, '§': {linux.KEY_SLASH, true, false},
 	'=': {linux.KEY_EQUAL, false, false}, '+': {linux.KEY_EQUAL, true, false},
-	'[': {linux.KEY_5, false, true}, ']': {linux.KEY_MINUS, false, false},
+	'[': {linux.KEY_5, false, true}, ']': {linux.KEY_MINUS, false, true},
 	'{': {linux.KEY_4, false, true}, '}': {linux.KEY_EQUAL, false, true},
 	'\\': {linux.KEY_8, false, true}, '|': {linux.KEY_6, false, true},
 	'<': {linux.KEY_102ND, false, false}, '>': {linux.KEY_102ND, true, false},
@@ -118,7 +118,7 @@ var azertyKeyMap = KeyMap{
 	'@': {linux.KEY_0, false, true}, '#': {linux.KEY_3, false, true},
 	'^': {linux.KEY_LEFTBRACE, false, false}, '¨': {linux.KEY_LEFTBRACE, true, false},
 	'*': {linux.KEY_BACKSLASH, false, false}, 'µ': {linux.KEY_BACKSLASH, true, false},
-	'%': {linux.KEY_APOSTROPHE, false, false}, 'ù': {linux.KEY_BACKSLASH, true, false},
+	'%': {linux.KEY_APOSTROPHE, false, false}, 'ù': {linux.KEY_APOSTROPHE, true, false},
 
 	// Space and Enter
 	' ':  {linux.KEY_SPACE, false, false},
