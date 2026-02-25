@@ -188,6 +188,7 @@ func (vg *virtualGamepad) Press(button Button) {
 	event, exist := vg.digital[button]
 	if !exist {
 		fmt.Printf("button not assigned (0x%x)\n", button)
+		return
 	}
 
 	press(event)
@@ -221,6 +222,7 @@ func (vg *virtualGamepad) Release(button Button) {
 	event, exist := vg.digital[button]
 	if !exist {
 		fmt.Printf("button not assigned (0x%x)\n", button)
+		return
 	}
 
 	release(event)
