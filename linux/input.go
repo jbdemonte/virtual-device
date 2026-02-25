@@ -305,19 +305,15 @@ type FFRumbleEffect struct {
 }
 
 // struct ff_effect
+// In C, the union U overlaps all members in the same memory.
+// We emulate this with a byte array sized to the largest member ([2]FFConditionEffect = 24 bytes).
 type FFEffect struct {
 	Type      uint16
 	ID        int16
 	Direction uint16
 	Trigger   FFTrigger
 	Replay    FFReplay
-	U         struct {
-		Constant  FFConstantEffect
-		Ramp      FFRampEffect
-		Periodic  FFPeriodicEffect
-		Condition [2]FFConditionEffect
-		Rumble    FFRumbleEffect
-	}
+	U         [24]byte
 }
 
 type FFEffectType uint16
