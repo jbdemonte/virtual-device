@@ -170,7 +170,7 @@ func (vt *virtualTouchpad) assignSlotIfNeeded(touchSlots []TouchSlot) []TouchSlo
 		reserved[ts.Slot] = true
 	}
 	used := make(map[int]bool)
-	for i, _ := range touchSlots {
+	for i := range touchSlots {
 		slot := touchSlots[i].Slot
 		if used[slot] {
 			for reserved[slot] || used[slot] {
