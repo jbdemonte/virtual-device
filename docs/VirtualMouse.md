@@ -73,12 +73,32 @@ package main
 
 import (
 	"fmt"
+	virtual_device "github.com/jbdemonte/virtual-device"
+	"github.com/jbdemonte/virtual-device/linux"
 	"github.com/jbdemonte/virtual-device/mouse"
 	"log"
 )
 
 func main() {
 	m := mouse.NewVirtualMouseFactory().
+		WithDevice(
+			virtual_device.NewVirtualDevice().
+				WithBusType(linux.BUS_USB).
+				WithVendor(0xDEAD).
+				WithProduct(0xBEEF).
+				WithVersion(0x01).
+				WithName("My Virtual Mouse").
+				WithButtons([]linux.Button{
+					linux.BTN_LEFT,
+					linux.BTN_RIGHT,
+					linux.BTN_MIDDLE,
+				}).
+				WithRelAxes([]linux.RelativeAxis{
+					linux.REL_X,
+					linux.REL_Y,
+					linux.REL_WHEEL,
+				}),
+		).
 		WithClickDelay(50).
 		WithDoubleClickDelay(250).
 		WithHighResStepVertical(120).
