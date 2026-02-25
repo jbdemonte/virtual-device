@@ -21,6 +21,8 @@ type VirtualKeyboard interface {
 	SyncReport()
 
 	Send(evType, code uint16, value int32)
+
+	EventPath() string
 }
 
 type VirtualKeyboardFactory interface {
@@ -188,4 +190,8 @@ func (vk *virtualKeyboard) Type(content string) {
 
 func (vk *virtualKeyboard) Send(evType, code uint16, value int32) {
 	vk.device.Send(evType, code, value)
+}
+
+func (vk *virtualKeyboard) EventPath() string {
+	return vk.device.EventPath()
 }

@@ -38,6 +38,8 @@ type VirtualMouse interface {
 	DoubleClickMiddle()
 
 	Send(evType, code uint16, value int32)
+
+	EventPath() string
 }
 
 type VirtualMouseFactory interface {
@@ -220,4 +222,8 @@ func (vm *virtualMouse) DoubleClickMiddle() {
 
 func (vm *virtualMouse) Send(evType, code uint16, value int32) {
 	vm.device.Send(evType, code, value)
+}
+
+func (vm *virtualMouse) EventPath() string {
+	return vm.device.EventPath()
 }

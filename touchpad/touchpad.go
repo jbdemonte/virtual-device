@@ -36,6 +36,8 @@ type VirtualTouchpad interface {
 	DoubleClickRight()
 
 	Send(evType, code uint16, value int32)
+
+	EventPath() string
 }
 
 type VirtualTouchpadFactory interface {
@@ -303,4 +305,8 @@ func (vt *virtualTouchpad) DoubleClickRight() {
 
 func (vt *virtualTouchpad) Send(evType, code uint16, value int32) {
 	vt.device.Send(evType, code, value)
+}
+
+func (vt *virtualTouchpad) EventPath() string {
+	return vt.device.EventPath()
 }
