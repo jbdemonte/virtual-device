@@ -23,6 +23,8 @@ type VirtualGamepad interface {
 	MoveRightStickY(y float32)
 
 	Send(evType, code uint16, value int32)
+
+	EventPath() string
 }
 
 type VirtualGamepadFactory interface {
@@ -89,6 +91,10 @@ func (vg *virtualGamepad) Register() error {
 
 func (vg *virtualGamepad) Unregister() error {
 	return vg.device.Unregister()
+}
+
+func (vg *virtualGamepad) EventPath() string {
+	return vg.device.EventPath()
 }
 
 func (vg *virtualGamepad) init() {
