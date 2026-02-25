@@ -394,8 +394,10 @@ func (vd *virtualDevice) registerLeds() error {
 
 func (vd *virtualDevice) pull() {
 	vd.queue = make(chan *linux.InputEvent, vd.queueLen)
+	vd.pullDone = make(chan struct{})
 
 	go func() {
+		defer close(vd.pullDone)
 		for event := range vd.queue {
 			err := vd.writeEvent(event)
 			if err != nil {
@@ -437,6 +439,7 @@ func (vd *virtualDevice) closeQueue() {
 		time.Sleep(time.Millisecond)
 	}
 	close(vd.queue)
+	<-vd.pullDone
 	vd.queue = nil
 }
 

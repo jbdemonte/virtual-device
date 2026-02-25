@@ -5,3 +5,9 @@ build:
 
 shell:
 	docker run --rm --privileged --entrypoint=/usr/bin/bash --name virtual_device_test -it ${LOCAL_IMG}
+
+test:
+	go test ./... -race
+
+test-integration: build
+	docker run --rm --privileged ${LOCAL_IMG}

@@ -71,4 +71,5 @@ type virtualDevice struct {
 	config       Config
 	isRegistered *utils.AtomicBool
 	queue        chan *linux.InputEvent
+	pullDone     chan struct{}
 }
