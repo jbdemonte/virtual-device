@@ -191,14 +191,14 @@ func main() {
     }
     defer g.Unregister()
     
-    g.Press(gamepad.ButtonA)
-    g.Release(gamepad.ButtonA)
+    g.Press(gamepad.ButtonSouth)
+    g.Release(gamepad.ButtonSouth)
     
     g.MoveLeftStick(0.5, -0.5)
     
     g.MoveRightStick(-1.0, 1.0)
 
-    g.Send(uint16(linux.EV_KEY), uint16(gamepad.ButtonA), 1)
+    g.Send(uint16(linux.EV_KEY), uint16(gamepad.ButtonSouth), 1)
 	
 }
 ```
