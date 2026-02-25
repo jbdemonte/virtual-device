@@ -9,10 +9,10 @@ The `VirtualTouchpadFactory` is used to configure and create instances of `Virtu
 
 The `VirtualTouchpad` interface defines the core functionalities of a virtual touchpad.
 
-It supports 3 normes (see [multi-touch-protocol](https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt)) : 
+It supports 3 protocols (see [multi-touch-protocol](https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt)) :
 - the legacy single touch protocol by using the `Touch`
-- the multitouch Protocol A by activating it with `WithLegacyMultitouch` using the `Multitoutch` function.
-- the multitouch Protocol B sing the `Multitoutch` function.
+- the multitouch Protocol A by activating it with `WithLegacyMultitouch` using the `MultiTouch` function.
+- the multitouch Protocol B using the `MultiTouch` function.
 
 _Coordinates X and Y are between -1 and 1 (normalized)_  
 _Pressure is between 0 and 1_
@@ -157,7 +157,7 @@ func main() {
     time.Sleep(2_000 * time.Millisecond)
     fmt.Println("add one finger")
     slots = append(slots, touchpad.TouchSlot{
-        {X: -0.3, Y:-0.4, Pressure: 0.2},
+        X: -0.3, Y: -0.4, Pressure: 0.2,
     })
     slots = tp.MultiTouch(slots)
     
