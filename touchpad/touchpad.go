@@ -203,12 +203,12 @@ func (vt *virtualTouchpad) multiTouchB(touchSlots []TouchSlot) []TouchSlot {
 
 	for _, ts := range touchSlots {
 		vt.device.SendAbsoluteEvent(linux.ABS_MT_SLOT, int32(ts.Slot))
-		if ts.Pressure == 0 {
+		if ts.Pressure == 0 && vt.currentSlots[ts.Slot] {
 			// release the Slot
 			vt.currentSlots[ts.Slot] = false
 			vt.device.SendAbsoluteEvent(linux.ABS_MT_TRACKING_ID, int32(-1))
 			vt.fingerCount = vt.fingerCount - 1
-		} else if vt.currentSlots[ts.Slot] == false {
+		} else if !vt.currentSlots[ts.Slot] && ts.Pressure > 0 {
 			// lock the Slot
 			vt.currentSlots[ts.Slot] = true
 			vt.device.SendAbsoluteEvent(linux.ABS_MT_TRACKING_ID, int32(ts.Slot))
@@ -227,13 +227,16 @@ func (vt *virtualTouchpad) multiTouchB(touchSlots []TouchSlot) []TouchSlot {
 }
 
 func (vt *virtualTouchpad) toggleFingerCount(count int, value bool) {
-	if count == 0 {
+	if count <= 0 {
 		return
 	}
 	buttons := []linux.Button{
 		linux.BTN_TOOL_FINGER, linux.BTN_TOOL_DOUBLETAP,
 		linux.BTN_TOOL_TRIPLETAP, linux.BTN_TOOL_QUADTAP,
 		linux.BTN_TOOL_QUINTTAP,
+	}
+	if count > len(buttons) {
+		return
 	}
 	button := buttons[count-1]
 	if value {
