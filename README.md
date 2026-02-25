@@ -83,7 +83,7 @@ To simplify common use cases, the package provides **helper classes** built on t
 2. **[`VirtualMouse`](./docs/VirtualMouse.md)**:
    - Designed for creating virtual mice or pointing devices.
    - Provides methods for moving the cursor, scrolling, and simulating mouse button actions.
-   - Example: `mouse.ClickLeft()` or `mouse.Move(0.5, 1)`.
+   - Example: `mouse.ClickLeft()` or `mouse.Move(50, 100)`.
 
 3. **[`VirtualGamepad`](./docs/VirtualGamepad.md)**:
    - Tailored for creating virtual game controllers.
