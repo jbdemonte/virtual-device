@@ -129,7 +129,7 @@ device.SetLed(linux.LED_CAPSL, false)  // Turn off the Caps Lock LED
 #### **Misc Events**
 Send miscellaneous events, including raw scan codes, to simulate hardware-level key events:
 ```go
-device.SendMiscEvent(linux.EV_MSC_SCAN, 0x1E) // Send the scan code for the "A" key
+device.SendMiscEvent(linux.MSC_SCAN, 0x1E) // Send the scan code for the "A" key
 ```
 
 ### **4. Synchronize Events**
