@@ -476,6 +476,9 @@ func (vd *virtualDevice) Unregister() (err error) {
 
 // Send an event to the device.
 func (vd *virtualDevice) Send(evType, code uint16, value int32) {
+	if !vd.isRegistered.Get() {
+		return
+	}
 	vd.queue <- &linux.InputEvent{
 		Type:  evType,
 		Code:  code,
