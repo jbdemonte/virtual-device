@@ -15,7 +15,6 @@ type AbsAxis struct {
 	Fuzz             int32
 	Resolution       int32
 	IsUnidirectional bool
-	IsDenormalized   bool
 }
 
 type Repeat struct {
