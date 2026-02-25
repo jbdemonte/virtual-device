@@ -151,8 +151,8 @@ func (vt *virtualTouchpad) Unregister() error {
 }
 
 func (vt *virtualTouchpad) sendDenormalizedAbsolute(axis linux.AbsoluteAxis, x float32) {
-	axisAbs, exits := vt.axes[axis]
-	if exits {
+	axisAbs, exists := vt.axes[axis]
+	if exists {
 		vt.device.SendAbsoluteEvent(axis, axisAbs.Denormalize(x))
 	}
 }
