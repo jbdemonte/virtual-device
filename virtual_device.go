@@ -238,12 +238,11 @@ func (vd *virtualDevice) createDevice() (err error) {
 		return fmt.Errorf("fetchEventPath: %v", err)
 	}
 
-	err = utils.WaitForEventFile(vd.eventPath, 2*time.Second)
-	if err != nil {
-		return fmt.Errorf("WaitForEventFile: %v", err)
-	}
-
 	if setAbsResolution {
+		err = utils.WaitForEventFile(vd.eventPath, 2*time.Second)
+		if err != nil {
+			return fmt.Errorf("WaitForEventFile (needed for setAbsResolution): %v", err)
+		}
 		err = vd.setAbsResolution()
 		if err != nil {
 			return fmt.Errorf("setAbsResolution: %v", err)

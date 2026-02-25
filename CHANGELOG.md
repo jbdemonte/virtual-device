@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.2.1] - 2026-02-25
+
+### Changed
+- Only wait for event file when `setAbsResolution` is needed, speeding up device registration for devices without axis resolution
+
 ## [v1.2.0] - 2026-02-25
 
 ### Added
